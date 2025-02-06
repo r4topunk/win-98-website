@@ -16,21 +16,26 @@ function App() {
   };
 
   return (
-    <div className="h-[80vh] bg-[#008080] relative overflow-hidden flex items-start p-1">
-      <button
-        className="flex flex-col gap-1 items-center p-2! bg-transparent! shadow-none! cursor-pointer"
-        onClick={playSound}
-      >
-        <img
-          src="/icons/computer_explorer_cool-0.png"
-          alt="Computer"
-          width={32}
-          className="pointer-events-none"
-        />
-        <p className="font-['Pixelated MS Sans Serif'] text-white font-light!">
-          My Computer
-        </p>
-      </button>
+    <div className="bg-[#008080] relative overflow-hidden flex items-start p-1">
+      <div className="h-[80vh]">
+        <button
+          className="flex flex-col gap-1 items-center p-2! bg-transparent! shadow-none! cursor-pointer"
+          onClick={() => {
+            playSound();
+            setModalActive((active) => !active);
+          }}
+        >
+          <img
+            src="/icons/computer_explorer_cool-0.png"
+            alt="Computer"
+            width={32}
+            className="pointer-events-none"
+          />
+          <p className="font-['Pixelated MS Sans Serif'] text-white font-light!">
+            My Computer
+          </p>
+        </button>
+      </div>
       <div
         className={cn(
           "window max-w-80 top-1/2 left-1/2 absolute transform -translate-x-1/2 -translate-y-1/2",
@@ -81,7 +86,6 @@ function App() {
           </div>
         </div>
       </div>
-
       <div className="fixed bottom-0 left-0 right-0 window">
         <div className="title-bar-text mr-0! flex justify-between items-center p-0.5">
           <button
