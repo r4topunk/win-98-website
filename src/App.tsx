@@ -15,14 +15,13 @@ function App() {
   };
 
   useEffect(() => {
-    document.body.style.zoom = "1.25";
     const handleClick = () => playSound();
     document.addEventListener("click", handleClick);
     return () => document.removeEventListener("click", handleClick);
   }, []);
 
   return (
-    <div className="bg-[url('/bg.jpg')] bg-cover bg-no-repeat bg-center relative overflow-hidden flex flex-col h-[80vh]">
+    <div className="bg-[url('/bg.jpg')] bg-cover bg-no-repeat bg-center relative overflow-hidden flex flex-col h-[100dvh] md:h-[80vh]">
       <Desktop />
       <Navbar openStartMenu={open} />
       <Modal isOpen={isOpen} onClose={close} title="Counter">
