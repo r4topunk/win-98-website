@@ -80,7 +80,6 @@ export function Window({
 
       if (containerRect) {
         const windowWidth = windowRef.current.offsetWidth;
-        const windowHeight = windowRef.current.offsetHeight;
 
         // Don't let window go completely off-screen
         constrainedX = Math.max(
@@ -134,7 +133,6 @@ export function Window({
 
       if (containerRect) {
         const windowWidth = windowRef.current.offsetWidth;
-        const windowHeight = windowRef.current.offsetHeight;
 
         constrainedX = Math.max(
           -(windowWidth * 0.75),

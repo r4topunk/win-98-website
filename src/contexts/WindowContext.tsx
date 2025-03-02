@@ -1,4 +1,4 @@
-import React, {
+import {
   createContext,
   useContext,
   useState,
@@ -82,12 +82,6 @@ export function WindowProvider({ children }: { children: ReactNode }) {
       x: Math.max(0, centerX / zoom + limitedOffset / zoom),
       y: Math.max(0, centerY / zoom + limitedOffset / zoom),
     };
-  };
-
-  // Helper function to handle zoom
-  const getZoomLevel = () => {
-    // Get the current zoom level - fallback to 1 if not set
-    return parseFloat(getComputedStyle(document.body).zoom) || 1;
   };
 
   const getDefaultWindowSize = () => {
