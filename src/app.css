@@ -3,3 +3,16 @@
     zoom: 1.25;
   }
 }
+
+/* Fix for dragging in Firefox which doesn't support zoom */
+@supports (-moz-appearance: none) {
+  @media (min-width: 1024px) {
+    body {
+      zoom: 1;
+      transform: scale(1.25);
+      transform-origin: top left;
+      width: 80%;
+      height: 80%;
+    }
+  }
+}
