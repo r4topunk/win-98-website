@@ -49,16 +49,17 @@ function App() {
               <button
                 onClick={() => {
                   const videoContainer = document.createElement('div');
-                  videoContainer.className = 'fixed inset-0 z-[50]';
+                  videoContainer.className = 'fixed inset-0 z-[50] bg-black flex items-center justify-center';
+                  
+                  const videoWrapper = document.createElement('div');
+                  videoWrapper.className = 'w-full h-auto max-h-full';
                   
                   const video = document.createElement('video');
                   video.src = '/intro.webm';
-                  video.style.position = 'absolute';
-                  video.style.top = '0';
-                  video.style.left = '0';
+                  video.style.position = 'relative';
                   video.style.width = '100%';
-                  video.style.height = '100%';
-                  video.style.objectFit = 'cover';
+                  video.style.height = 'auto';
+                  video.style.objectFit = 'contain';
                   
                   // Add CRT effect elements
                   const crtOverlay = document.createElement('div');
@@ -70,7 +71,8 @@ function App() {
                     <div class="absolute inset-0 opacity-[0.03] bg-noise"></div>
                   `;
                   
-                  videoContainer.appendChild(video);
+                  videoWrapper.appendChild(video);
+                  videoContainer.appendChild(videoWrapper);
                   videoContainer.appendChild(crtOverlay);
                   
                   // Add flickering effect

@@ -34,38 +34,40 @@ export const IntroVideo = ({ onComplete }: IntroVideoProps) => {
   if (!showVideo) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black">
-      <video
-        ref={videoRef}
-        className="w-full h-full object-cover"
-        autoPlay
-        controls={false}
-        onEnded={onComplete}
-      >
-        <source src="/intro.webm" type="video/webm" />
-      </video>
-      
-      {/* CRT Effect Overlay */}
-      <div className="pointer-events-none fixed inset-0 z-[51]">
-        {/* Scanlines */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/10 to-transparent bg-[length:100%_4px] animate-scan"></div>
+    <div className="fixed inset-0 z-50 bg-black flex items-center justify-center">
+      <div className="w-full h-auto max-h-full">
+        <video
+          ref={videoRef}
+          className="w-full h-auto object-contain"
+          autoPlay
+          controls={false}
+          onEnded={onComplete}
+        >
+          <source src="/intro.webm" type="video/webm" />
+        </video>
         
-        {/* Vignette effect */}
-        <div className="absolute inset-0 bg-radial-gradient opacity-50"></div>
-        
-        {/* Screen curvature */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/5 via-transparent to-black/5"></div>
-        
-        {/* Subtle noise texture */}
-        <div className="absolute inset-0 opacity-[0.03] bg-noise"></div>
-      </div>
+        {/* CRT Effect Overlay */}
+        <div className="pointer-events-none fixed inset-0 z-[51]">
+          {/* Scanlines */}
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/10 to-transparent bg-[length:100%_4px] animate-scan"></div>
+          
+          {/* Vignette effect */}
+          <div className="absolute inset-0 bg-radial-gradient opacity-50"></div>
+          
+          {/* Screen curvature */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/5 via-transparent to-black/5"></div>
+          
+          {/* Subtle noise texture */}
+          <div className="absolute inset-0 opacity-[0.03] bg-noise"></div>
+        </div>
 
-      <button
-        onClick={onComplete}
-        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-white/20 hover:bg-white/30 text-white px-6 py-2 rounded-full backdrop-blur-sm transition-all z-[52]"
-      >
-        Pular
-      </button>
+        <button
+          onClick={onComplete}
+          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-white/20 hover:bg-white/30 text-white px-6 py-2 rounded-full backdrop-blur-sm transition-all z-[52]"
+        >
+          Pular
+        </button>
+      </div>
     </div>
   );
 }; 
