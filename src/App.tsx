@@ -52,7 +52,7 @@ function App() {
                   videoContainer.className = 'fixed inset-0 z-[50]';
                   
                   const video = document.createElement('video');
-                  video.src = '/intro.mp4';
+                  video.src = '/intro.webm';
                   video.style.position = 'absolute';
                   video.style.top = '0';
                   video.style.left = '0';
