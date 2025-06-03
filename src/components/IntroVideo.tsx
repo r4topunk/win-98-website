@@ -50,7 +50,7 @@ export const IntroVideo = ({ onComplete }: IntroVideoProps) => {
 
   return (
     <div className="fixed inset-0 z-50 bg-black flex items-center justify-center">
-      <div className="w-full h-auto max-h-full relative">
+      <div className="w-full h-full max-w-full max-h-full flex items-center justify-center relative">
         {error && (
           <div className="absolute inset-0 flex items-center justify-center text-white">
             <p>Failed to load video. Please try again.</p>
@@ -59,7 +59,7 @@ export const IntroVideo = ({ onComplete }: IntroVideoProps) => {
 
         <video
           ref={videoRef}
-          className="w-full h-auto object-contain"
+          className="w-full h-full max-w-full max-h-full object-contain"
           autoPlay
           controls={false}
           onEnded={onComplete}
