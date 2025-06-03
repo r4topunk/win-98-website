@@ -6,21 +6,32 @@ interface IntroVideoProps {
 
 export const IntroVideo = ({ onComplete }: IntroVideoProps) => {
   const [showVideo, setShowVideo] = useState(false);
+  const [error, setError] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    // const lastShown = localStorage.getItem('introLastShown');
     const now = new Date().getTime();
-    
-    // if (!lastShown || now - parseInt(lastShown) > 3600000) { // 1 hour in milliseconds
-      setShowVideo(true);
-      localStorage.setItem('introLastShown', now.toString());
-    // }
+    setShowVideo(true);
+    localStorage.setItem('introLastShown', now.toString());
   }, []);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
+
+    const handleCanPlay = () => {
+      video.play().catch((err) => {
+        console.error('Error playing video:', err);
+        setError(true);
+      });
+    };
+
+    const handleError = () => {
+      setError(true);
+    };
+
+    video.addEventListener('canplay', handleCanPlay);
+    video.addEventListener('error', handleError);
 
     // Add flickering effect
     const flickerInterval = setInterval(() => {
@@ -28,22 +39,36 @@ export const IntroVideo = ({ onComplete }: IntroVideoProps) => {
       video.style.filter = `brightness(${brightness})`;
     }, 100);
 
-    return () => clearInterval(flickerInterval);
+    return () => {
+      video.removeEventListener('canplay', handleCanPlay);
+      video.removeEventListener('error', handleError);
+      clearInterval(flickerInterval);
+    };
   }, []);
 
   if (!showVideo) return null;
 
   return (
     <div className="fixed inset-0 z-50 bg-black flex items-center justify-center">
-      <div className="w-full h-auto max-h-full">
+      <div className="w-full h-auto max-h-full relative">
+        {error && (
+          <div className="absolute inset-0 flex items-center justify-center text-white">
+            <p>Failed to load video. Please try again.</p>
+          </div>
+        )}
+
         <video
           ref={videoRef}
           className="w-full h-auto object-contain"
           autoPlay
           controls={false}
           onEnded={onComplete}
+          playsInline
+          preload="auto"
+          muted
         >
-          <source src="/intro.webm" type="video/webm" />
+          <source src={`/intro.webm?t=${Date.now()}`} type="video/webm" />
+          <source src={`/intro.mp4?t=${Date.now()}`} type="video/mp4" />
         </video>
         
         {/* CRT Effect Overlay */}
@@ -63,7 +88,7 @@ export const IntroVideo = ({ onComplete }: IntroVideoProps) => {
 
         <button
           onClick={onComplete}
-          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-white/20 hover:bg-white/30 text-white px-6 py-2 rounded-full backdrop-blur-sm transition-all z-[52]"
+          className="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-white/20 hover:bg-white/30 text-white px-6 py-2 rounded-full backdrop-blur-sm transition-all z-[52]"
         >
           Pular
         </button>
