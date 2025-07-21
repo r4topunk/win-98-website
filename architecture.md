@@ -1,7 +1,9 @@
 # Project Architecture Documentation
 
 ## Overview
-**win-98-website** is a nostalgic Windows 98-themed interactive website built with modern React technology. The project recreates the classic Windows 98 desktop experience complete with draggable windows, desktop icons, CRT monitor effects, and authentic retro aesthetics using the 98.css library. It features an immersive intro video system, window management capabilities, and responsive design that works across desktop and mobile devices.
+**win-98-website** is a nostalgic Windows 98-themed interactive website built with modern React technology designed to showcase an artist's work and portfolio. The project recreates the classic Windows 98 desktop experience complete with draggable windows, desktop icons, CRT monitor effects, and authentic retro aesthetics using the 98.css library. It features an immersive intro video system, window management capabilities, and responsive design that works across desktop and mobile devices.
+
+**Primary Purpose**: This is an artist showcase website where every UX decision should prioritize content consumption and user engagement with the artist's work. The Windows 98 aesthetic serves as an interactive gallery interface rather than a fully functional desktop environment.
 
 ## Technology Stack
 
@@ -73,6 +75,9 @@ franciscoskt/
 
 ## Core Components
 
+### Design Philosophy
+**Content-First Approach**: Every component and interaction is designed to showcase the artist's work effectively. The Windows 98 aesthetic serves as an engaging, nostalgic interface that draws users into exploring the artist's portfolio. Features are implemented based on their value for content discovery and consumption rather than desktop application completeness.
+
 ### 1. Application Root (`App.tsx`)
 - **Responsibilities**: Main application orchestration, intro video flow, sound effects, global CRT effects
 - **Key Features**: 
@@ -106,16 +111,19 @@ franciscoskt/
 
 ### 3. Desktop Environment
 **Desktop.tsx**
-- **Purpose**: Desktop icon layout and organization
-- **Content**: 14 themed desktop icons arranged in columns (Movies, Images, Computer, Contact, etc.)
+- **Purpose**: Artist portfolio navigation through themed desktop icons
+- **Content**: 14 curated desktop icons representing different aspects of the artist's work (Movies, Images, Computer, Contact, etc.)
+- **UX Focus**: Intuitive content discovery with clear visual hierarchy
 
 **DesktopIcon.tsx**
-- **Purpose**: Interactive desktop icons that spawn windows
-- **Features**: Click-to-open window functionality, Windows 98 icon styling
+- **Purpose**: Interactive portfolio entry points that launch content windows
+- **Features**: Click-to-explore content functionality, Windows 98 icon styling
+- **UX Focus**: Clear affordances for content exploration
 
 **Navbar.tsx**
-- **Purpose**: Windows 98 taskbar with Start button and clock
+- **Purpose**: Windows 98 taskbar providing navigation context and ambiance
 - **Features**: Real-time clock updates, Start menu integration
+- **UX Focus**: Maintains immersive experience without overwhelming content
 
 ### 4. Visual Effects System
 **CRTEffect.tsx**
@@ -132,8 +140,9 @@ franciscoskt/
 
 ### 5. Content Management
 **WindowContents.tsx**
-- **Purpose**: Dynamic content renderer for different window types
-- **Supported Types**: Movies (file tree), Images (gallery), Computer (drives), Counter (interactive)
+- **Purpose**: Dynamic artist content renderer optimized for consumption
+- **Supported Types**: Movies (video portfolio), Images (art gallery), Computer (project files), Contact (artist info)
+- **UX Focus**: Content is king - layouts prioritize readability, visual impact, and easy navigation
 
 ## Data Flow
 
@@ -240,6 +249,13 @@ export default defineConfig({
 
 ## Code Conventions
 
+### UX Design Principles
+- **Content Accessibility**: Ensure all artist work is easily discoverable and consumable
+- **Visual Hierarchy**: Prioritize content over interface elements
+- **Performance**: Optimize for content loading and viewing experience
+- **Mobile Optimization**: Content must be fully accessible on mobile devices
+- **Engagement**: Interactive elements should enhance, not distract from, content consumption
+
 ### File Organization
 - **Components**: PascalCase filenames (`Window.tsx`)
 - **Hooks**: camelCase with `use` prefix (`useModal.ts`)
@@ -266,6 +282,12 @@ export default defineConfig({
 
 ## Known Issues & Technical Debt
 
+### Content-First Considerations
+- **Content Loading**: Large media files should have progressive loading for better UX
+- **Gallery Navigation**: Could benefit from keyboard shortcuts for content browsing
+- **Content Search**: No search functionality for finding specific artist works
+- **Content Metadata**: Limited information display about individual pieces
+
 ### Cross-Browser Compatibility
 - **Firefox Zoom Issue**: Requires transform-based scaling workaround
 - **Touch Events**: Some older mobile browsers may have interaction issues
@@ -289,11 +311,15 @@ export default defineConfig({
 5. **Accessibility**: ARIA labels and keyboard navigation could be improved
 
 ### Future Improvements
+- **Content Management**: Better organization and categorization of artist works
+- **SEO Optimization**: Meta tags and structured data for better discoverability
+- **Social Sharing**: Easy sharing of individual portfolio pieces
+- **Content Analytics**: Understanding user engagement with different works
 - **Progressive Enhancement**: Better handling of JavaScript disabled scenarios
 - **Performance**: Implement intersection observer for efficient CRT effects
-- **Accessibility**: Full WCAG compliance implementation
-- **Internationalization**: Multi-language support structure
-- **State Persistence**: LocalStorage for window positions and preferences
+- **Accessibility**: Full WCAG compliance implementation focused on content accessibility
+- **Internationalization**: Multi-language support for global artist reach
+- **Portfolio Features**: Filtering, sorting, and detailed view capabilities
 
 ## Update Instructions
 
