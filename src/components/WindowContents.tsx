@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { ImageGalleryGrid } from "./gallery/ImageGalleryGrid";
+import { sampleGalleries } from "../data/galleries";
 
 interface WindowContentsProps {
   iconType: string;
@@ -10,45 +12,44 @@ export function WindowContents({ iconType }: WindowContentsProps) {
   // Different content based on which icon was clicked
   switch (iconType) {
     case "Movies":
-      return (
+      return sampleGalleries.movies ? (
+        <ImageGalleryGrid gallery={sampleGalleries.movies} />
+      ) : (
         <div className="p-2">
-          <h4>My Movies</h4>
-          <div className="field-row">
-            <ul className="tree-view">
-              <li>Action</li>
-              <li>Comedy</li>
-              <li>Drama</li>
-              <li>Horror</li>
-            </ul>
-          </div>
+          <p>Gallery not found</p>
         </div>
       );
 
     case "Images":
-      return (
+      return sampleGalleries.images ? (
+        <ImageGalleryGrid gallery={sampleGalleries.images} />
+      ) : (
         <div className="p-2">
-          <h4>My Images</h4>
-          <div className="grid grid-cols-2 gap-2">
-            <div className="bg-gray-200 h-16 flex items-center justify-center">
-              Image 1
-            </div>
-            <div className="bg-gray-200 h-16 flex items-center justify-center">
-              Image 2
-            </div>
-            <div className="bg-gray-200 h-16 flex items-center justify-center">
-              Image 3
-            </div>
-            <div className="bg-gray-200 h-16 flex items-center justify-center">
-              Image 4
-            </div>
-          </div>
+          <p>Gallery not found</p>
+        </div>
+      );
+
+    case "Album Covers":
+      return sampleGalleries.albumCovers ? (
+        <ImageGalleryGrid gallery={sampleGalleries.albumCovers} />
+      ) : (
+        <div className="p-2">
+          <p>Gallery not found</p>
+        </div>
+      );
+
+    case "Desenhe":
+      return sampleGalleries.desenhe ? (
+        <ImageGalleryGrid gallery={sampleGalleries.desenhe} />
+      ) : (
+        <div className="p-2">
+          <p>Gallery not found</p>
         </div>
       );
 
     case "Computer":
       return (
         <div className="p-2">
-          <h4>My Computer</h4>
           <div className="field-row">
             <ul className="tree-view">
               <li>Local Disk (C:)</li>
@@ -74,7 +75,6 @@ export function WindowContents({ iconType }: WindowContentsProps) {
     default:
       return (
         <div className="p-2">
-          <h4>{iconType}</h4>
           <p>Content for {iconType} window</p>
           <div className="field-row">
             <button>OK</button>

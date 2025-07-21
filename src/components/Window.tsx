@@ -16,6 +16,8 @@ interface WindowProps {
   position: { x: number; y: number };
   size?: { width: number; height: number };
   onClose: () => void;
+  onFocus?: () => void;
+  isActive?: boolean;
   style?: CSSProperties;
 }
 
@@ -27,11 +29,17 @@ export function Window({
   position,
   size,
   onClose,
+  onFocus,
+  isActive = true,
   style = {},
 }: WindowProps) {
-  const { setWindowPosition, minimizeWindow } = useWindowContext();
+  const { setWindowPosition, setWindowSize, minimizeWindow } = useWindowContext();
   const [isDragging, setIsDragging] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
+  const [resizeDirection, setResizeDirection] = useState<string>("");
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [resizeStartSize, setResizeStartSize] = useState({ width: 0, height: 0 });
+  const [resizeStartPos, setResizeStartPos] = useState({ x: 0, y: 0 });
   const windowRef = useRef<HTMLDivElement>(null);
 
   // Get zoom level from document body (will be 1 if no zoom is applied)
@@ -44,6 +52,8 @@ export function Window({
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     // Only allow dragging from the title bar
     if ((e.target as HTMLElement).closest(".title-bar")) {
+      // Focus window immediately when starting to drag
+      onFocus?.();
       setIsDragging(true);
       const rect = windowRef.current?.getBoundingClientRect();
       if (rect) {
@@ -59,11 +69,34 @@ export function Window({
 
   const handleMouseUp = () => {
     setIsDragging(false);
+    setIsResizing(false);
+    setResizeDirection("");
+  };
+
+  const handleResizeMouseDown = (e: React.MouseEvent<HTMLDivElement>, direction: string) => {
+    e.stopPropagation(); // Prevent window drag
+    setIsResizing(true);
+    setResizeDirection(direction);
+    
+    if (windowRef.current) {
+      const rect = windowRef.current.getBoundingClientRect();
+      const zoom = getZoomLevel();
+      
+      setResizeStartSize({
+        width: rect.width / zoom,
+        height: rect.height / zoom,
+      });
+      setResizeStartPos({
+        x: e.clientX / zoom,
+        y: e.clientY / zoom,
+      });
+    }
   };
 
   const handleMouseMove = (e: MouseEvent) => {
+    const zoom = getZoomLevel();
+
     if (isDragging && windowRef.current) {
-      const zoom = getZoomLevel();
       // Apply zoom correction
       const newX = e.clientX / zoom - dragOffset.x;
       const newY = e.clientY / zoom - dragOffset.y;
@@ -96,11 +129,51 @@ export function Window({
       }
 
       setWindowPosition(id, { x: constrainedX, y: constrainedY });
+    } else if (isResizing && windowRef.current) {
+      const deltaX = e.clientX / zoom - resizeStartPos.x;
+      const deltaY = e.clientY / zoom - resizeStartPos.y;
+      
+      let newWidth = resizeStartSize.width;
+      let newHeight = resizeStartSize.height;
+      
+      // Calculate new dimensions based on resize direction
+      if (resizeDirection.includes('right')) {
+        newWidth = Math.max(250, resizeStartSize.width + deltaX); // Minimum width
+      }
+      if (resizeDirection.includes('left')) {
+        newWidth = Math.max(250, resizeStartSize.width - deltaX);
+      }
+      if (resizeDirection.includes('bottom')) {
+        newHeight = Math.max(200, resizeStartSize.height + deltaY); // Minimum height
+      }
+      if (resizeDirection.includes('top')) {
+        newHeight = Math.max(200, resizeStartSize.height - deltaY);
+      }
+      
+      // Update window size
+      setWindowSize(id, { width: newWidth, height: newHeight });
+      
+      // If resizing from top or left, also update position
+      if (resizeDirection.includes('left') || resizeDirection.includes('top')) {
+        let newX = position.x;
+        let newY = position.y;
+        
+        if (resizeDirection.includes('left')) {
+          newX = position.x + (resizeStartSize.width - newWidth);
+        }
+        if (resizeDirection.includes('top')) {
+          newY = position.y + (resizeStartSize.height - newHeight);
+        }
+        
+        setWindowPosition(id, { x: newX, y: newY });
+      }
     }
   };
 
   const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
     if ((e.target as HTMLElement).closest(".title-bar")) {
+      // Focus window immediately when starting to drag
+      onFocus?.();
       setIsDragging(true);
       const rect = windowRef.current?.getBoundingClientRect();
       if (rect && e.touches[0]) {
@@ -156,7 +229,7 @@ export function Window({
   };
 
   useEffect(() => {
-    if (isDragging) {
+    if (isDragging || isResizing) {
       window.addEventListener("mousemove", handleMouseMove);
       window.addEventListener("mouseup", handleMouseUp);
       window.addEventListener("touchmove", handleTouchMove, { passive: false });
@@ -174,14 +247,16 @@ export function Window({
       window.removeEventListener("touchmove", handleTouchMove);
       window.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [isDragging, dragOffset]);
+  }, [isDragging, isResizing, dragOffset, resizeDirection, resizeStartSize, resizeStartPos]);
 
   if (!isOpen) return null;
 
   return (
     <div
       ref={windowRef}
-      className={cn("window absolute shadow-md", { "z-50": isDragging })}
+      className={cn("window absolute shadow-md", { 
+        "opacity-90": !isActive
+      })}
       style={{
         left: `${position.x}px`,
         top: `${position.y}px`,
@@ -189,9 +264,16 @@ export function Window({
         height: size?.height ? `${size.height}px` : "auto",
         maxWidth: "100%",
         maxHeight: "calc(100% - 30px)",
+        zIndex: isDragging || isResizing ? 9999 : (style.zIndex || 10),
         ...style,
       }}
-      onMouseDown={handleMouseDown}
+      onMouseDown={(e) => {
+        // Focus window on click (for non-title bar clicks)
+        if (!(e.target as HTMLElement).closest(".title-bar")) {
+          onFocus?.();
+        }
+        handleMouseDown(e);
+      }}
       onTouchStart={handleTouchStart}
     >
       <div className="title-bar cursor-move">
@@ -203,14 +285,54 @@ export function Window({
         </div>
       </div>
       <div
-        className="window-body"
+        className="window-body relative flex-1 min-h-0"
         style={{
-          overflow: "auto",
-          maxHeight: "calc(100vh - 100px)",
-          padding: "0.5rem",
+          overflow: "hidden", // Prevent content from overflowing the window
+          height: size?.height ? `${size.height - 60}px` : "calc(100% - 60px)", // Account for title bar
         }}
       >
-        {children}
+        <div 
+          className="h-full overflow-auto p-2"
+          style={{
+            maxHeight: "100%", // Ensure content scrolls within bounds
+          }}
+        >
+          {children}
+        </div>
+        
+        {/* Resize handles */}
+        <div 
+          className="absolute top-0 right-0 w-2 h-2 cursor-ne-resize"
+          onMouseDown={(e) => handleResizeMouseDown(e, 'top-right')}
+        />
+        <div 
+          className="absolute top-0 left-0 w-2 h-2 cursor-nw-resize"
+          onMouseDown={(e) => handleResizeMouseDown(e, 'top-left')}
+        />
+        <div 
+          className="absolute bottom-0 right-0 w-2 h-2 cursor-se-resize"
+          onMouseDown={(e) => handleResizeMouseDown(e, 'bottom-right')}
+        />
+        <div 
+          className="absolute bottom-0 left-0 w-2 h-2 cursor-sw-resize"
+          onMouseDown={(e) => handleResizeMouseDown(e, 'bottom-left')}
+        />
+        <div 
+          className="absolute top-0 left-2 right-2 h-1 cursor-n-resize"
+          onMouseDown={(e) => handleResizeMouseDown(e, 'top')}
+        />
+        <div 
+          className="absolute bottom-0 left-2 right-2 h-1 cursor-s-resize"
+          onMouseDown={(e) => handleResizeMouseDown(e, 'bottom')}
+        />
+        <div 
+          className="absolute left-0 top-2 bottom-2 w-1 cursor-w-resize"
+          onMouseDown={(e) => handleResizeMouseDown(e, 'left')}
+        />
+        <div 
+          className="absolute right-0 top-2 bottom-2 w-1 cursor-e-resize"
+          onMouseDown={(e) => handleResizeMouseDown(e, 'right')}
+        />
       </div>
     </div>
   );

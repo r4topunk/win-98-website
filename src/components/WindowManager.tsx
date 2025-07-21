@@ -2,11 +2,11 @@ import { useWindowContext } from "../contexts/WindowContext";
 import { Window } from "./Window";
 
 export function WindowManager() {
-  const { windows, closeWindow } = useWindowContext();
+  const { windows, closeWindow, focusWindow, activeWindowId } = useWindowContext();
 
   return (
     <>
-      {windows.map((window, index) => (
+      {windows.map((window) => (
         <Window
           key={window.id}
           id={window.id}
@@ -15,7 +15,9 @@ export function WindowManager() {
           position={window.position}
           size={window.size}
           onClose={() => closeWindow(window.id)}
-          style={{ zIndex: index + 10 }} // Apply increasing z-index based on order
+          onFocus={() => focusWindow(window.id)}
+          isActive={activeWindowId === window.id}
+          style={{ zIndex: window.zIndex || 10 }}
         >
           {window.content}
         </Window>
