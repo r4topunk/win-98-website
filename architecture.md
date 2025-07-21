@@ -1,7 +1,15 @@
 # Project Architecture Documentation
 
 ## Overview
-**win-98-website** is a nostalgic Windows 98-themed interactive website built with modern React technology designed to showcase an artist's work and portfolio. The project recreates the classic Windows 98 desktop experience complete with draggable windows, desktop icons, CRT monitor effects, and authentic retro aesthetics using the 98.css library. It features an immersive intro video system, window management capabilities, and responsive design that works across desktop and mobile devices.
+**win-98-website** is a nostalgic Windows 98-themed interactive website built with modern React technology designed to showcase an artist's work and portfolio. The project recreates the classic Windows 98 desktop experience complete with draggable windows, desktop icons, CRT monitor effects, and au### Known Issues & Technical Debt
+
+### Recent Improvements (Phase 1 Completed)
+- **Window Resizing**: Full 8-directional resize capability with constraints
+- **Content Overflow**: Fixed mobile content containment issues
+- **Z-Index Management**: Resolved window focus and drag behavior
+- **Gallery System**: Complete image gallery implementation with viewer
+- **Responsive Design**: Optimized window sizing and grid layouts
+- **Performance**: Improved content loading and window interactionshentic retro aesthetics using the 98.css library. It features an immersive intro video system, window management capabilities, and responsive design that works across desktop and mobile devices.
 
 **Primary Purpose**: This is an artist showcase website where every UX decision should prioritize content consumption and user engagement with the artist's work. The Windows 98 aesthetic serves as an interactive gallery interface rather than a fully functional desktop environment.
 
@@ -42,6 +50,9 @@ franciscoskt/
 │       └── ...                # Other desktop icons
 ├── src/
 │   ├── components/            # React components
+│   │   ├── gallery/           # Image gallery system (NEW)
+│   │   │   ├── ImageGalleryGrid.tsx    # Grid layout for thumbnails
+│   │   │   └── ImageGalleryViewer.tsx  # Full image viewer with navigation
 │   │   ├── CRTEffect.tsx      # CRT monitor visual effects
 │   │   ├── desktop-icon.tsx   # Individual desktop icon component
 │   │   ├── desktop.tsx        # Desktop layout with icons
@@ -49,11 +60,13 @@ franciscoskt/
 │   │   ├── Modal.tsx          # Start menu modal component
 │   │   ├── navbar.tsx         # Windows 98 taskbar
 │   │   ├── VintageTransition.tsx # Screen transition effects
-│   │   ├── Window.tsx         # Draggable window component
+│   │   ├── Window.tsx         # Draggable & resizable window component
 │   │   ├── WindowContents.tsx # Dynamic window content renderer
 │   │   └── WindowManager.tsx  # Window orchestration
 │   ├── contexts/
 │   │   └── WindowContext.tsx  # Global window state management
+│   ├── data/                  # Data structures (NEW)
+│   │   └── galleries.ts       # Gallery interfaces and sample data
 │   ├── hooks/
 │   │   └── useModal.ts        # Modal state management hook
 │   ├── utils/
@@ -92,22 +105,28 @@ franciscoskt/
 - **Features**: 
   - Multi-window state (open, minimized, positioned)
   - Responsive positioning with mobile/desktop adaptations
-  - Window stacking (z-index) management
-  - Cascade positioning for multiple windows
+  - Advanced window stacking (z-index) management
+  - Cascade positioning for multiple windows (30px offset)
   - Zoom-aware positioning calculations
+  - Active window tracking and focus management
+  - Navbar collision avoidance (40px bottom margin)
+  - Window sizing optimization (750×550 for galleries)
 
 **Window.tsx**
-- **Purpose**: Individual draggable window component
+- **Purpose**: Individual draggable and resizable window component
 - **Features**:
   - Cross-platform drag support (mouse + touch)
+  - Full window resizing with 8-directional handles (corners + edges)
   - Boundary constraint system
   - Zoom-level awareness for accurate positioning
   - Windows 98 authentic styling with title bars
   - Minimize, maximize, close controls
+  - Z-index management and focus handling
+  - Content overflow protection and proper height calculations
 
 **WindowManager.tsx**
 - **Purpose**: Renders and manages all active windows
-- **Features**: Dynamic z-index stacking, window lifecycle management
+- **Features**: Dynamic z-index stacking, window lifecycle management, focus state propagation
 
 ### 3. Desktop Environment
 **Desktop.tsx**
@@ -117,8 +136,8 @@ franciscoskt/
 
 **DesktopIcon.tsx**
 - **Purpose**: Interactive portfolio entry points that launch content windows
-- **Features**: Click-to-explore content functionality, Windows 98 icon styling
-- **UX Focus**: Clear affordances for content exploration
+- **Features**: Click-to-explore content functionality, Windows 98 icon styling, responsive window sizing
+- **UX Focus**: Clear affordances for content exploration with optimized window dimensions
 
 **Navbar.tsx**
 - **Purpose**: Windows 98 taskbar providing navigation context and ambiance
@@ -143,15 +162,53 @@ franciscoskt/
 - **Purpose**: Dynamic artist content renderer optimized for consumption
 - **Supported Types**: Movies (video portfolio), Images (art gallery), Computer (project files), Contact (artist info)
 - **UX Focus**: Content is king - layouts prioritize readability, visual impact, and easy navigation
+- **Gallery Integration**: Routes gallery content to dedicated ImageGalleryGrid components
+
+### 6. Image Gallery System (NEW)
+**ImageGalleryGrid.tsx**
+- **Purpose**: Grid-based image gallery display within windows
+- **Features**: 
+  - Responsive 2/3 column grid layout (mobile/desktop)
+  - Aspect-ratio preserved image thumbnails
+  - Click-to-open image viewer functionality
+  - Proper content containment and overflow handling
+  - Hover effects and visual feedback
+  - Gallery metadata display
+
+**ImageGalleryViewer.tsx** 
+- **Purpose**: Full-screen image viewing with navigation
+- **Features**:
+  - Full image display optimized for window viewing
+  - Previous/Next navigation controls
+  - Keyboard navigation support (arrow keys, Home/End)
+  - Image counter display and loading states
+  - Auto-scaling with aspect ratio preservation
+  - Gallery context awareness
+
+### 7. Data Layer (NEW)
+**galleries.ts**
+- **Purpose**: Gallery data structures and sample content
+- **Features**:
+  - TypeScript interfaces for GalleryImage and ImageGallery
+  - Sample galleries: Movies, Images, Album Covers, Drawings
+  - Helper functions for gallery retrieval
+  - Placeholder image data for development
 
 ## Data Flow
 
 ### Window Lifecycle
-1. **Icon Click** → `DesktopIcon` calls `openWindow()`
-2. **Context Update** → `WindowContext` manages window state
-3. **Rendering** → `WindowManager` renders active windows
-4. **User Interaction** → Window drag/close actions update context
-5. **State Persistence** → Window positions and states maintained
+1. **Icon Click** → `DesktopIcon` calls `openWindow()` with appropriate sizing
+2. **Context Update** → `WindowContext` manages window state with focus and z-index
+3. **Rendering** → `WindowManager` renders active windows with focus state
+4. **User Interaction** → Window drag/resize/focus actions update context
+5. **State Persistence** → Window positions, sizes, and focus states maintained
+
+### Gallery Content Flow (NEW)
+1. **Gallery Icon Click** → Opens ImageGalleryGrid window with gallery data
+2. **Grid Rendering** → Displays responsive grid of image thumbnails
+3. **Image Selection** → Click opens ImageGalleryViewer window
+4. **Viewer Navigation** → Previous/Next controls with keyboard support
+5. **Multi-Gallery Support** → Multiple gallery and viewer windows simultaneously
 
 ### Application Startup Flow
 1. **Initial Load** → `App.tsx` initializes with intro video
@@ -174,10 +231,12 @@ franciscoskt/
 ```typescript
 interface WindowContextType {
   windows: Window[];
-  openWindow: (window: Omit<Window, "isOpen" | "isMinimized" | "position">) => void;
+  activeWindowId: string | null;
+  openWindow: (window: Omit<Window, "isOpen" | "isMinimized" | "position" | "zIndex">) => void;
   closeWindow: (id: string) => void;
   minimizeWindow: (id: string) => void;
   restoreWindow: (id: string) => void;
+  focusWindow: (id: string) => void;
   setWindowPosition: (id: string, position: { x: number; y: number }) => void;
   setWindowSize: (id: string, size: { width: number; height: number }) => void;
 }
@@ -193,6 +252,22 @@ interface Window {
   isMinimized: boolean;
   position: { x: number; y: number };
   size?: { width: number; height: number };
+  zIndex?: number;
+}
+```
+
+#### Gallery Interfaces (NEW)
+```typescript
+interface GalleryImage {
+  src: string;
+  alt: string;
+  title?: string;
+}
+
+interface ImageGallery {
+  id: string;
+  name: string;
+  images: GalleryImage[];
 }
 ```
 
@@ -304,13 +379,14 @@ export default defineConfig({
 - **Keyboard Navigation**: Limited accessibility for keyboard-only users
 
 ### Technical Debt
-1. **Hardcoded Values**: Some magic numbers in positioning calculations
+1. **Hardcoded Values**: Some magic numbers in positioning calculations (reduced but still present)
 2. **Error Boundaries**: No React error boundaries for component failure handling
-3. **Loading States**: Limited loading feedback for video and asset loading
+3. **Loading States**: Limited loading feedback for video and asset loading (improved for galleries)
 4. **Testing**: No automated tests implemented
-5. **Accessibility**: ARIA labels and keyboard navigation could be improved
+5. **Accessibility**: ARIA labels and keyboard navigation could be improved (partial keyboard support in galleries)
 
 ### Future Improvements
+- **Phase 2 Implementation**: Advanced gallery navigation and keyboard shortcuts
 - **Content Management**: Better organization and categorization of artist works
 - **SEO Optimization**: Meta tags and structured data for better discoverability
 - **Social Sharing**: Easy sharing of individual portfolio pieces
@@ -320,6 +396,8 @@ export default defineConfig({
 - **Accessibility**: Full WCAG compliance implementation focused on content accessibility
 - **Internationalization**: Multi-language support for global artist reach
 - **Portfolio Features**: Filtering, sorting, and detailed view capabilities
+- **Window Snapping**: Advanced window positioning and snapping features
+- **Taskbar Integration**: Window switching via taskbar functionality
 
 ## Update Instructions
 
@@ -348,5 +426,6 @@ This document should be updated whenever:
 
 **Last Updated**: July 21, 2025  
 **Updated By**: GitHub Copilot Architecture Analysis Agent  
-**Codebase Version**: Current main branch state  
-**Dependencies Last Checked**: July 21, 2025
+**Codebase Version**: Phase 1 Complete - Image Gallery System Implemented  
+**Dependencies Last Checked**: July 21, 2025  
+**Major Changes**: Added complete gallery system, enhanced window management, fixed mobile issues
