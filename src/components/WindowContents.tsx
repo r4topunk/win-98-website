@@ -72,6 +72,17 @@ export function WindowContents({ iconType }: WindowContentsProps) {
         </div>
       );
 
+    case "Lojinha":
+      return (
+        <div className="p-0 h-full">
+          <iframe
+            src="https://franciscoskt.lojavirtualnuvem.com.br/"
+            className="w-full h-full border-0"
+            title="Lojinha - Francisco SKT"
+          />
+        </div>
+      );
+
     default:
       return (
         <div className="p-2">
