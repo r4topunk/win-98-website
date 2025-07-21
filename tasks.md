@@ -1,478 +1,319 @@
 # Windows 98 Artist Portfolio - Development Tasks
 
 ## Overview
-This document outlines the development plan for an authentic Windows 98-themed artist portfolio. The focus is on creating a hybrid solution that maintains true Windows 98 UI patterns while ensuring excellent performance on both desktop and mobile devices. The approach avoids modern gallery concepts that didn't exist in Windows 98, instead embracing the authentic file-based navigation and window management of the era.
+This document outlines the development plan for a Windows 98-themed artist portfolio focused on creating an intuitive image showcase system. The emphasis is on building reusable image gallery components that work seamlessly within Windows 98-style windows, providing an authentic desktop experience with proper multi-window management and user interaction patterns.
 
-## Phase 1: Authentic Windows 98 Foundation
+## Phase 1: Core Image Gallery System
 
-### 1.1 File Explorer Based Content System
-**Concept**: Replicate how Windows 98 actually handled images and media - through file explorer windows, not modern galleries
-**Target UX**: Users navigate folders, double-click files to open them in appropriate applications
-
-#### Core Tasks:
-- [ ] **File Explorer Component** (`src/components/FileExplorer.tsx`)
-  - Classic Windows 98 file list view (icon view, list view, details view)
-  - Folder navigation with back/forward buttons
-  - Address bar showing current folder path
-  - Status bar with file count and selection info
-  - Right-click context menus for files and folders
-
-- [ ] **File System Data Structure** (`src/data/filesystem.ts`)
-  - Hierarchical folder structure (e.g., `/Portfolio/Paintings/2024/`)
-  - File metadata (name, type, size, date modified)
-  - Support for different file types (images, videos, documents)
-  - Thumbnail cache for image files
-
-- [ ] **File Type Handlers**
-  - **Image Viewer** (`src/components/ImageViewer.tsx`): Windows 98 style image viewer
-  - **Media Player** (`src/components/MediaPlayer.tsx`): Windows Media Player inspired interface
-  - **Text Viewer** (`src/components/TextViewer.tsx`): Notepad-style text display
-
-### 1.2 Authentic Window Management
-**Concept**: Windows behave exactly like Windows 98 - multiple overlapping windows, taskbar, proper window controls
-**Target UX**: Classic desktop metaphor with authentic interactions
+### 1.1 Reusable Image Gallery Components
+**Concept**: Create modular components that can display image collections in Windows 98-style interfaces
+**Target UX**: Grid-based image browsing with seamless navigation between collections and individual images
 
 #### Core Tasks:
-- [ ] **Enhanced Window Component** (update `Window.tsx`)
-  - Proper window chrome (title bar, borders, resize handles)
-  - Window controls (minimize, maximize/restore, close)
-  - Window dragging and resizing with constraints
-  - Window snapping to screen edges
-  - Modal dialogs for file operations
+- [ ] **Image Gallery Grid Component** (`src/components/ImageGalleryGrid.tsx`)
+  - Grid layout displaying image previews/thumbnails
+  - Clean, minimal interface without redundant titles inside windows
+  - Responsive grid that adapts to window size
+  - Click interaction to open individual image viewer
+  - Hover effects for better user feedback
+  - Support for variable image aspect ratios
 
-- [ ] **Taskbar Integration** (`src/components/Taskbar.tsx`)
-  - Running applications list
-  - Window switching via taskbar buttons
-  - Start menu with program shortcuts
-  - System tray with clock and status indicators
+- [ ] **Image Gallery Viewer Component** (`src/components/ImageGalleryViewer.tsx`)
+  - Full image display optimized for window viewing
+  - Navigation controls (Previous/Next buttons)
+  - Keyboard navigation support (Arrow keys, Esc to close)
+  - Image counter display (e.g., "3 of 12")
+  - Auto-scaling to fit window size while maintaining aspect ratio
+  - Support for high-resolution image loading
 
-- [ ] **Desktop Icon Management** (update `desktop-icon.tsx`)
-  - Authentic Windows 98 desktop icons
-  - Single-click to select, double-click to open
-  - Icon spacing and grid alignment
-  - Desktop right-click context menu
+- [ ] **Gallery Data Structure** (`src/data/galleries.ts`)
+  - Simple image list interfaces
+  - Image objects with src, alt, and optional title properties
+  - Gallery collection groupings
+  - No complex metadata - focus on display
 
-### 1.3 Classic Application Framework
-**Concept**: Each content type opens in its own "application" window with appropriate UI
-**Target UX**: Authentic software applications from the Windows 98 era
+#### Gallery Interface Design:
+```typescript
+interface GalleryImage {
+  src: string;
+  alt: string;
+  title?: string;
+}
 
-#### Core Tasks:
-- [ ] **Application Templates**
-  - Paint-style interface for image viewing
-  - Explorer-style interface for folder browsing
-  - Media Player interface for videos/audio
-  - Notepad interface for text content
+interface ImageGallery {
+  id: string;
+  name: string;
+  images: GalleryImage[];
+}
+```
 
-- [ ] **Application Menu System** (`src/components/MenuBar.tsx`)
-  - File, Edit, View, Help menus
-  - Keyboard shortcuts (Ctrl+O, Ctrl+S, etc.)
-  - Context-sensitive menu items
-  - About dialogs for each application
-
-## Phase 2: Mobile-Responsive Windows 98
-
-### 2.1 Adaptive Window Behavior
-**Concept**: Windows 98 interface that intelligently adapts to mobile screens without losing authenticity
-**Target UX**: Touch-friendly Windows 98 that feels natural on mobile
-
-#### Core Tasks:
-- [ ] **Smart Window Sizing** (update `WindowContext.tsx`)
-  - Mobile: Windows expand to near full-screen automatically
-  - Tablet: Traditional windowed interface with touch-friendly controls
-  - Desktop: Classic overlapping windows behavior
-  - Window controls sized for touch targets (44px minimum)
-
-- [ ] **Touch-Enhanced File Explorer** (update `FileExplorer.tsx`)
-  - Larger file icons for touch selection
-  - Touch-friendly scrollbars
-  - Tap to select, double-tap to open
-  - Touch-and-hold for context menus
-  - Swipe gestures for back/forward navigation
-
-- [ ] **Mobile Taskbar** (update `Taskbar.tsx`)
-  - Bottom-positioned taskbar for thumb reach
-  - Larger taskbar buttons for touch
-  - Swipe up gesture to access Start menu
-  - Auto-hide behavior in full-screen apps
-
-### 2.2 Responsive Desktop Layout
-**Concept**: Desktop that adapts to screen size while maintaining Windows 98 aesthetics
-**Target UX**: Icons and windows that scale appropriately
+### 1.2 Enhanced Window Management System
+**Concept**: Improve window interactions with focus on multi-window workflows and usability
+**Target UX**: Smooth, intuitive window management that supports multiple galleries open simultaneously
 
 #### Core Tasks:
-- [ ] **Responsive Icon Grid** (update `desktop.tsx`)
-  - Icon size adapts to screen density
-  - Flexible grid layout maintaining proper spacing
-  - Portrait mode: vertical icon arrangement
-  - Landscape mode: traditional grid layout
+- [ ] **Resizable Windows** (update `Window.tsx`)
+  - Add resize handles to all four corners and edges
+  - Maintain minimum window sizes for usability
+  - Constrain resizing within screen boundaries
+  - Smooth resize animations and visual feedback
+  - Remember window sizes per application type
 
-- [ ] **Adaptive UI Components** (`src/components/ResponsiveUI.tsx`)
-  - Scalable window chrome and controls
-  - Touch-friendly buttons and scroll bars
-  - Adaptive text sizing for readability
-  - High-DPI support for crisp graphics
+- [ ] **Window Focus Management** (update `WindowContext.tsx`)
+  - Click-to-focus behavior for overlapping windows
+  - Visual indicators for active/inactive windows
+  - Z-index management for proper window stacking
+  - Automatic window focusing when opened
+  - Taskbar integration for window switching
 
-### 2.3 Performance Optimizations
-**Concept**: Windows 98 UI that loads fast and runs smoothly on all devices
-**Target UX**: Instant response times and smooth animations
+- [ ] **Improved Window Content Area** (update `Window.tsx`)
+  - Remove redundant title display inside windows
+  - Clean content area that maximizes image display space
+  - Proper padding and margins for different content types
+  - Seamless integration between window chrome and content
+
+- [ ] **Multi-Window User Experience**
+  - Cascade positioning for new windows
+  - Smart positioning to avoid complete overlap
+  - Window snapping to screen edges and other windows
+  - Quick window arrangement shortcuts
+  - Visual feedback during window interactions
+
+### 1.3 Gallery Integration with Desktop Icons
+**Concept**: Desktop icons that launch specific image galleries in dedicated windows
+**Target UX**: Each desktop icon represents a different image collection
 
 #### Core Tasks:
-- [ ] **Image Optimization System**
-  - Multiple image sizes (thumbnail, preview, full)
-  - WebP format with JPEG fallbacks
-  - Lazy loading for large file lists
-  - Progressive image enhancement
+- [ ] **Gallery Desktop Icons** (update `desktop-icon.tsx` and `desktop.tsx`)
+  - Configure existing desktop icons to launch image galleries
+  - Pass specific gallery data to windows
+  - Support for different gallery types (Photos, Artwork, Projects, etc.)
+  - Icon-to-gallery mapping configuration
 
-- [ ] **Virtual Scrolling** (`src/components/VirtualList.tsx`)
-  - Handle large file lists efficiently
-  - Only render visible items
-  - Smooth scrolling performance
-  - Memory usage optimization
+- [ ] **Window Content Router** (update `WindowContents.tsx`)
+  - Route gallery data to appropriate components
+  - Handle both gallery grid and image viewer windows
+  - Support for opening viewer from grid selections
+  - Clean separation between different content types
 
-- [ ] **Caching Strategy**
-  - Browser cache for thumbnails and previews
-  - Session storage for file system state
-  - Service worker for offline functionality
-  - Preload critical UI assets
+## Phase 2: User Interaction & Experience Enhancement
+
+### 2.1 Advanced Gallery Navigation
+**Concept**: Seamless navigation between gallery views and individual images
+**Target UX**: Intuitive flow from grid browsing to focused image viewing
+
+#### Core Tasks:
+- [ ] **Gallery-to-Viewer Window Flow**
+  - Clicking image in gallery opens new viewer window
+  - Maintain reference to parent gallery for navigation
+  - Support for multiple viewer windows from same gallery
+  - Proper window positioning to avoid complete overlap
+
+- [ ] **Image Navigation Controls** (within `ImageGalleryViewer.tsx`)
+  - Previous/Next arrow buttons with Windows 98 styling
+  - Keyboard shortcuts (Left/Right arrows, Home/End)
+  - Wrap-around navigation (last image → first image)
+  - Visual feedback for navigation state
+  - Quick jump to first/last image
+
+- [ ] **Gallery Context Management**
+  - Track current image position in gallery
+  - Handle dynamic gallery updates
+  - Maintain navigation state across window interactions
+  - Smooth transitions between images
+
+### 2.2 Multi-Window User Experience
+**Concept**: Optimize for users working with multiple gallery windows simultaneously
+**Target UX**: Professional desktop workflow with multiple image collections
+
+#### Core Tasks:
+- [ ] **Window Focus & Selection**
+  - Clear visual distinction between active and inactive windows
+  - Smooth focus transitions
+  - Click-anywhere-to-focus behavior
+  - Keyboard shortcuts for window switching (Alt+Tab style)
+
+- [ ] **Intelligent Window Positioning**
+  - Smart cascade for new windows
+  - Prevent windows from opening directly on top of each other
+  - Screen edge snapping for organization
+  - Window arrangement memory
+
+- [ ] **Window Interaction Feedback**
+  - Hover effects on window controls
+  - Visual feedback during resize operations
+  - Smooth animations for minimize/restore
+  - Drag preview during window movement
+
+### 2.3 Keyboard & Accessibility Support
+**Concept**: Full keyboard navigation support for power users
+**Target UX**: Complete functionality available without mouse
+
+#### Core Tasks:
+- [ ] **Gallery Grid Keyboard Navigation**
+  - Arrow keys for grid navigation
+  - Enter to open selected image
+  - Tab navigation through UI elements
+  - Escape to close/cancel operations
+
+- [ ] **Image Viewer Keyboard Controls**
+  - Arrow keys for image navigation
+  - Space bar for next image
+  - Escape to close viewer
+  - Number keys for quick jump (1-9)
+
+- [ ] **Window Management Shortcuts**
+  - Alt+F4 to close windows
+  - Alt+Space for window menu
+  - Windows key shortcuts where appropriate
+  - Tab order for window controls
 
 ## Implementation Guidelines
 
-### Authentic Windows 98 Patterns
+### Component Architecture
 ```
-Core UI Components:
-├── Window chrome (title bar, borders, controls)
-├── File Explorer (list view, icon view, details)
-├── Menu bars (File, Edit, View, Help)
-├── Dialog boxes (Open, Save As, Properties)
-├── Taskbar (Start button, running apps, system tray)
-└── Desktop (icons, wallpaper, right-click menu)
+src/components/
+├── gallery/                    # Gallery system components
+│   ├── ImageGalleryGrid.tsx   # Grid view of images
+│   ├── ImageGalleryViewer.tsx # Individual image display
+│   ├── GalleryNavigation.tsx  # Navigation controls
+│   └── GalleryImage.tsx       # Individual image component
+├── windows/                    # Enhanced window management
+│   ├── Window.tsx             # Main window component
+│   ├── WindowChrome.tsx       # Window title bar and controls
+│   ├── WindowContent.tsx      # Content area wrapper
+│   └── ResizeHandle.tsx       # Window resize functionality
+└── desktop/                   # Desktop environment
+    ├── Desktop.tsx            # Desktop layout
+    ├── DesktopIcon.tsx        # Individual icons
+    └── Taskbar.tsx            # Windows taskbar
+```
 
-Content Applications:
-├── Image Viewer (Windows Picture Viewer style)
-├── Media Player (Windows Media Player style)
-├── Text Viewer (Notepad style)
-└── File Properties (Properties dialog style)
+### Data Flow Architecture
 ```
+Gallery Selection Flow:
+1. Desktop Icon Click → Open Gallery Grid Window
+2. Gallery Grid renders images from passed gallery data
+3. Image Click → Open Gallery Viewer Window with full gallery context
+4. Viewer handles navigation within the gallery collection
+5. Multiple viewers can reference same gallery data
 
-### Code Organization
-```
-src/
-├── components/
-│   ├── applications/      # Individual app components
-│   │   ├── ImageViewer.tsx
-│   │   ├── MediaPlayer.tsx
-│   │   ├── FileExplorer.tsx
-│   │   └── TextViewer.tsx
-│   ├── desktop/          # Desktop shell components
-│   │   ├── Desktop.tsx
-│   │   ├── Taskbar.tsx
-│   │   ├── StartMenu.tsx
-│   │   └── SystemTray.tsx
-│   ├── windows/          # Window management
-│   │   ├── Window.tsx
-│   │   ├── WindowChrome.tsx
-│   │   ├── MenuBar.tsx
-│   │   └── DialogBox.tsx
-│   └── ui/               # Core UI elements
-│       ├── Button.tsx
-│       ├── ScrollBar.tsx
-│       ├── ProgressBar.tsx
-│       └── StatusBar.tsx
-├── data/
-│   ├── filesystem.ts     # Virtual file system
-│   ├── applications.ts   # Available applications
-│   └── preferences.ts    # User settings
-├── hooks/
-│   ├── useFileSystem.ts  # File operations
-│   ├── useWindows.ts     # Window management
-│   └── useTouch.ts       # Touch interactions
-└── utils/
-    ├── fileUtils.ts      # File type handling
-    ├── windowUtils.ts    # Window positioning
-    └── touchUtils.ts     # Touch gesture recognition
+Window Management Flow:
+1. Window Context tracks all open windows
+2. Focus management handles active/inactive states
+3. Position management prevents overlap conflicts
+4. Resize system maintains usability constraints
 ```
 
 ### Development Approach
 
-#### Phase 1 Focus (Weeks 1-2)
-- Implement authentic file explorer interface
-- Create proper window management system
-- Build file type handlers (image viewer, media player)
-- Establish virtual file system for content
+#### Phase 1 Focus (Week 1)
+- Build core gallery components (Grid and Viewer)
+- Implement basic window resizing functionality
+- Create gallery data structure and sample data
+- Remove redundant titles from window content areas
 
-#### Phase 2 Focus (Weeks 3-4)
-- Add responsive behaviors for mobile devices
-- Implement touch-friendly interactions
-- Optimize performance for various screen sizes
-- Add progressive loading for media content
+#### Phase 2 Focus (Week 2)
+- Add navigation controls to image viewer
+- Implement window focus management system
+- Create keyboard navigation support
+- Polish multi-window user experience
 
-### Authentic Windows 98 Features
-
-#### Desktop Metaphor
-- Icons arranged on desktop grid
-- File and folder operations via explorer windows
-- Multiple applications running simultaneously
-- Window-based interface with proper z-order management
-
-#### File-Based Navigation
-- Browse content through folder hierarchies
-- File thumbnails in explorer view
-- Right-click context menus for file operations
-- Properties dialogs showing file details
-
-#### Application Framework
-- Each content type opens in appropriate viewer
-- Consistent menu bars and keyboard shortcuts
-- Modal dialogs for user interactions
-- Status bars showing relevant information
+#### Phase 3 Focus (Week 3)
+- Optimize for performance with large image collections
+- Add advanced window positioning features
+- Implement accessibility improvements
+- Create comprehensive gallery integration tests
 
 ### Success Criteria
 
-#### Authenticity Metrics
-- UI matches Windows 98 visual standards
-- Interaction patterns feel familiar to Windows 98 users
-- File system metaphor is properly implemented
-- All standard Windows 98 keyboard shortcuts work
+#### Gallery Functionality
+- [ ] Grid displays images clearly in resizable windows
+- [ ] Image viewer opens with proper navigation controls
+- [ ] Navigation works smoothly between images in collection
+- [ ] Multiple galleries can be open simultaneously
+
+#### Window Management
+- [ ] Windows resize smoothly with proper constraints
+- [ ] Focus management works intuitively
+- [ ] Window positioning prevents unusable overlap
+- [ ] Keyboard shortcuts provide full functionality
+
+#### User Experience
+- [ ] Interface feels responsive and smooth
+- [ ] Visual feedback is clear and immediate
+- [ ] Multi-window workflow is intuitive
+- [ ] Component reusability is demonstrated across different galleries
+
+### Technical Requirements
 
 #### Performance Targets
-- File explorer loads < 1s for 100+ items
-- Image thumbnails appear < 0.5s
+- Gallery grid loads < 1s for 50+ images
+- Image viewer opens < 0.5s
 - Window operations feel instant (< 16ms)
-- Touch interactions respond < 100ms
+- Memory usage stays reasonable with multiple windows
 
-#### Cross-Platform Goals
-- Identical experience on desktop and mobile
-- Touch gestures complement mouse interactions
-- UI scales properly on all screen sizes
-- All functionality available regardless of input method
+#### Component Reusability
+- Gallery components work with any image array
+- Window system supports any content type
+- Navigation system adapts to different collection sizes
+- Styling remains consistent across all instances
 
 ---
 
-This approach creates an authentic Windows 98 experience that respects the original design patterns while providing modern performance and mobile compatibility. The focus is on recreating how Windows 98 actually worked rather than retrofitting modern UI concepts with retro styling.
+This focused approach creates a clean, reusable image gallery system within authentic Windows 98 window management, prioritizing user interaction and multi-window workflows over complex features.
 
-## Priority 3: Desktop Experience Enhancement
+## Priority Tasks Summary
 
-### 3.1 Improved Desktop Icon Layout
-**Current Issue**: Static two-column layout
-**Target UX**: Organized, discoverable content navigation
+### Immediate Development Focus (Week 1)
+1. **Remove redundant titles inside windows** - Clean up `Window.tsx` content area
+2. **Add window resize functionality** - Implement resize handles and constraints
+3. **Create ImageGalleryGrid component** - Grid layout for image thumbnails
+4. **Create ImageGalleryViewer component** - Full image display with navigation
+5. **Update window focus management** - Visual feedback for active/inactive windows
 
-#### Tasks:
-- [ ] **Dynamic Icon Arrangement** (update `desktop.tsx`)
-  - Responsive grid that adapts to screen size
-  - Drag-and-drop icon positioning
-  - Category-based grouping (visual separator lines)
+### Secondary Development Focus (Week 2)
+1. **Implement gallery navigation controls** - Previous/Next buttons and keyboard support
+2. **Enhance window positioning system** - Smart cascade and overlap prevention
+3. **Add keyboard shortcuts** - Full keyboard navigation support
+4. **Create sample gallery data** - Test data for development and demonstration
+5. **Optimize multi-window user experience** - Smooth transitions and interactions
 
-- [ ] **Icon Enhancement** (update `desktop-icon.tsx`)
-  - Hover animations and previews
-  - Badges for new/updated content
-  - Context menu with quick actions
-  - Double-click vs single-click behaviors
+### Code Changes Required
 
-## Priority 4: Mobile Experience Optimization
+#### Key Files to Modify:
+- `src/components/Window.tsx` - Add resize functionality, remove internal titles
+- `src/contexts/WindowContext.tsx` - Enhance focus and positioning management
+- `src/components/WindowContents.tsx` - Route gallery content to new components
+- `src/components/desktop.tsx` - Configure icons for gallery launching
+- Create `src/components/gallery/ImageGalleryGrid.tsx` - New component
+- Create `src/components/gallery/ImageGalleryViewer.tsx` - New component
+- Create `src/data/galleries.ts` - Gallery data structure
 
-### 4.1 Touch-First Navigation
-**Current Issue**: Desktop-centric interaction model
-**Target UX**: Mobile-optimized content consumption
-
-#### Tasks:
-- [ ] **Mobile Gallery Interface** (`src/components/MobileGallery.tsx`)
-  - Full-screen image swiping
-  - Pull-to-refresh for content updates
-  - Gesture-based navigation (pinch, swipe, tap)
-
-- [ ] **Bottom Navigation Bar** (`src/components/MobileNav.tsx`)
-  - Easy thumb-reach navigation
-  - Quick category switching
-  - Search functionality
-
-### 4.2 Responsive Content Layout
-**Current Issue**: Desktop windows on mobile
-**Target UX**: Native mobile content experience
-
-#### Tasks:
-- [ ] **Adaptive Window Behavior** (update `WindowManager.tsx`)
-  - Full-screen content on mobile
-  - Slide-up panels for secondary content
-  - Stack-based navigation (iOS style)
-
-## Priority 5: Performance & Loading Experience
-
-### 5.1 Progressive Image Loading
-**Current Issue**: No optimization for large media files
-**Target UX**: Fast, smooth content loading
-
-#### Tasks:
-- [ ] **Image Optimization Pipeline**
-  - Multiple image sizes (thumbnail, medium, full)
-  - WebP format with fallbacks
-  - Intersection Observer for lazy loading
-
-- [ ] **Loading States** (`src/components/LoadingStates.tsx`)
-  - Windows 98 themed loading animations
-  - Progressive image reveal
-  - Skeleton screens for content
-
-### 5.2 Content Caching Strategy
-#### Tasks:
-- [ ] **Browser Cache Optimization**
-  - Service worker for image caching
-  - Preload critical portfolio pieces
-  - Offline mode for previously viewed content
-
-## Priority 6: Enhanced Visual Experience
-
-### 6.1 Improved CRT Effects
-**Current Issue**: Basic CRT overlay
-**Target UX**: Authentic retro aesthetic that enhances content
-
-#### Tasks:
-- [ ] **Content-Aware CRT Effects** (update `CRTEffect.tsx`)
-  - Reduce effects during content viewing
-  - Full effects for ambiance, minimal for readability
-  - User toggle for accessibility
-
-### 6.2 Visual Transitions
-#### Tasks:
-- [ ] **Smooth Content Transitions** (`src/components/ContentTransitions.tsx`)
-  - Page transitions between gallery views
-  - Zoom animations for image viewing
-  - Slide animations for video playback
-
-## Priority 7: Content Discovery Features
-
-### 7.1 Search & Filter System
-**Current Issue**: No way to find specific content
-**Target UX**: Easy content discovery
-
-#### Tasks:
-- [ ] **Search Interface** (`src/components/SearchBar.tsx`)
-  - Windows 98 styled search input
-  - Real-time filtering
-  - Search by tags, categories, dates
-
-- [ ] **Filter Panel** (`src/components/FilterPanel.tsx`)
-  - Category checkboxes
-  - Date range slider
-  - Sort options (newest, oldest, popular)
-
-### 7.2 Content Recommendations
-#### Tasks:
-- [ ] **Related Content System**
-  - Show similar artworks
-  - "More from this series" suggestions
-  - Recently viewed history
-
-## Implementation Guidelines
-
-### Code Organization
+#### New Component Structure:
 ```
-src/
-├── components/
-│   ├── content/           # Content-specific components
-│   │   ├── ImageGrid.tsx
-│   │   ├── ImageViewer.tsx
-│   │   ├── VideoGrid.tsx
-│   │   └── VideoPlayer.tsx
-│   ├── gallery/          # Gallery-specific features
-│   │   ├── GalleryControls.tsx
-│   │   ├── ContentPreview.tsx
-│   │   └── SearchBar.tsx
-│   ├── mobile/           # Mobile-optimized components
-│   │   ├── MobileGallery.tsx
-│   │   ├── MobileNav.tsx
-│   │   └── TouchGestures.tsx
-│   └── ui/               # Shared UI components
-│       ├── LoadingStates.tsx
-│       ├── ErrorBoundary.tsx
-│       └── ContentTransitions.tsx
-├── data/                 # Content data and schemas
-│   ├── artworks.ts
-│   ├── videos.ts
-│   └── categories.ts
-├── hooks/                # Custom hooks for content
-│   ├── useImageLoader.ts
-│   ├── useGalleryNavigation.ts
-│   └── useTouchGestures.ts
-└── utils/                # Utility functions
-    ├── imageUtils.ts
-    ├── touchUtils.ts
-    └── contentUtils.ts
+src/components/gallery/
+├── ImageGalleryGrid.tsx      # Grid of image thumbnails
+├── ImageGalleryViewer.tsx    # Full image display with navigation
+├── GalleryImage.tsx          # Individual image component
+└── GalleryNavigation.tsx     # Navigation controls component
 ```
-
-### Development Phases
-
-#### Phase 1: Core Gallery (Weeks 1-2)
-- Image grid and viewer components
-- Basic video grid
-- Content data structure
-
-#### Phase 2: Mobile Optimization (Weeks 3-4)
-- Touch gestures
-- Mobile-first gallery interface
-- Responsive window behavior
-
-#### Phase 3: Advanced Features (Weeks 5-6)
-- Search and filtering
-- Content previews
-- Performance optimizations
-
-#### Phase 4: Polish & Enhancement (Weeks 7-8)
-- Visual effects refinement
-- Accessibility improvements
-- Cross-browser testing
-
-### Success Metrics
-
-#### User Engagement
-- Time spent viewing content
-- Number of images/videos viewed per session
-- Return visitor rate
-
-#### Technical Performance
-- Image loading speed (< 2s for thumbnails)
-- Mobile performance (60fps scrolling)
-- Accessibility compliance (WCAG 2.1 AA)
-
-#### Content Discovery
-- Content interaction rate
-- Search usage and success rate
-- Mobile vs desktop engagement comparison
-
-### Accessibility Considerations
-
-- [ ] **Keyboard Navigation**
-  - Tab order through gallery items
-  - Arrow key navigation in grid views
-  - Escape key to close modals
-
-- [ ] **Screen Reader Support**
-  - Alt text for all artwork
-  - ARIA labels for gallery controls
-  - Semantic HTML structure
-
-- [ ] **Visual Accessibility**
-  - High contrast mode support
-  - Text scaling compatibility
-  - Motion reduction preferences
 
 ---
 
 ## Notes for Implementation
 
-### Content-First Principles
-Every feature should ask: "Does this help users discover and enjoy the artist's work better?"
+### Core Principles
+- **Reusability**: Gallery components work with any image array
+- **Simplicity**: No complex metadata, focus on image display
+- **Multi-window support**: Multiple galleries open simultaneously
+- **Authentic Windows 98 UX**: Maintain retro aesthetic while improving usability
 
-### Performance Budget
-- Gallery thumbnails: < 50KB each
-- Full images: < 2MB each
-- Video previews: < 10MB each
-- Page load time: < 3s on 3G
+### User Workflow
+1. Click desktop icon → Opens gallery grid window
+2. Click image in grid → Opens image viewer window with navigation
+3. Use Previous/Next to browse through images
+4. Multiple windows can be open and resized as needed
+5. Windows focus properly when clicked
 
-### Windows 98 Aesthetic Balance
-Maintain nostalgic charm while ensuring modern usability:
-- Use Windows 98 styling for UI chrome
-- Keep content areas clean and readable
-- Authentic sound effects and animations
-- Modern touch interactions with retro visual feedback
-
-This comprehensive enhancement plan transforms the basic Windows 98 simulation into a sophisticated artist portfolio platform that leverages nostalgia to create an engaging, memorable content discovery experience.
+This updated task list focuses specifically on your requirements: reusable image gallery components, clean window management, and intuitive multi-window interaction patterns.
