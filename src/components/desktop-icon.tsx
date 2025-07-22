@@ -1,45 +1,53 @@
-import { useWindowContext } from "../contexts/WindowContext";
-import { WindowContents } from "./WindowContents";
+import { useWindowContext } from "../contexts/WindowContext"
+import { WindowContents } from "./WindowContents"
 
 interface DesktopIconProps {
-  icon_path: string;
-  icon_name: string;
+  icon_path: string
+  icon_name: string
 }
 
 export function DesktopIcon({ icon_path, icon_name }: DesktopIconProps) {
-  const { openWindow } = useWindowContext();
+  const { openWindow } = useWindowContext()
 
   const handleIconClick = () => {
     // Special case for Lojinha - open URL in new tab
     if (icon_name === "Lojinha") {
-      window.open("https://franciscoskt.lojavirtualnuvem.com.br/", "_blank");
-      return;
+      window.open("https://franciscoskt.lojavirtualnuvem.com.br/", "_blank")
+      return
     }
 
     // Determine appropriate window size for gallery content
-    const isGallery = ['Movies', 'Images', 'Album Covers', 'Desenhe'].includes(icon_name);
-    
+    const isGallery = ["Movies", "Images", "Album Covers", "Desenhe"].includes(
+      icon_name
+    )
+
     // Check if mobile (basic check since we don't have access to WindowContext state here)
-    const isMobile = window.innerWidth < 768;
-    
-    let windowSize;
+    const isMobile = window.innerWidth < 768
+
+    let windowSize
     if (isGallery) {
-      windowSize = isMobile 
-        ? { width: Math.min(320, window.innerWidth - 20), height: Math.min(400, window.innerHeight - 140) }
-        : { width: 750, height: 550 }; // Made wider for 3-column layout
+      windowSize = isMobile
+        ? {
+            width: Math.min(320, window.innerWidth - 20),
+            height: Math.min(400, window.innerHeight - 140),
+          }
+        : { width: 950, height: 600 } // Much wider for better gallery layout
     } else {
-      windowSize = isMobile 
-        ? { width: Math.min(280, window.innerWidth - 30), height: Math.min(300, window.innerHeight - 140) }
-        : { width: 500, height: 400 }; // Made wider
+      windowSize = isMobile
+        ? {
+            width: Math.min(280, window.innerWidth - 30),
+            height: Math.min(300, window.innerHeight - 140),
+          }
+        : { width: 740, height: 540 } // Updated to new default size
     }
-    
+
     openWindow({
       id: icon_name.toLowerCase().replace(/\s/g, "-"),
       title: icon_name,
       content: <WindowContents iconType={icon_name} />,
       size: windowSize,
-    });
-  };
+    })
+  }
 
   return (
     <button
@@ -56,5 +64,5 @@ export function DesktopIcon({ icon_path, icon_name }: DesktopIconProps) {
         {icon_name}
       </p>
     </button>
-  );
+  )
 }

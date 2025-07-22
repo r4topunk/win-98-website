@@ -1,3 +1,4 @@
+import { useState, useEffect, useRef } from "react"
 import { GalleryImage, ImageGallery } from "../../data/galleries"
 import { useWindowContext } from "../../contexts/WindowContext"
 import { cn } from "../../utils/cn"
@@ -13,6 +14,42 @@ export function ImageGalleryGrid({
   className,
 }: ImageGalleryGridProps) {
   const { openWindow } = useWindowContext()
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [containerWidth, setContainerWidth] = useState(0)
+
+  // Function to determine number of columns based on container width
+  const getGridColumns = (width: number): number => {
+    if (width < 400) return 2
+    if (width < 600) return 3
+    if (width < 800) return 4
+    if (width < 1000) return 5
+    return 6 // 6+ columns for very wide windows
+  }
+
+  // Track container width changes
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const newWidth = entry.contentRect.width
+        console.log(`🖼️ Gallery "${gallery.name}" container resized:`, {
+          width: newWidth,
+          columns: getGridColumns(newWidth),
+        })
+        setContainerWidth(newWidth)
+      }
+    })
+
+    resizeObserver.observe(container)
+    // Set initial width
+    setContainerWidth(container.offsetWidth)
+
+    return () => resizeObserver.disconnect()
+  }, [])
+
+  const columns = getGridColumns(containerWidth)
 
   const handleImageClick = (image: GalleryImage, index: number) => {
     // Open image viewer window with full gallery context
@@ -22,15 +59,20 @@ export function ImageGalleryGrid({
       content: (
         <ImageGalleryViewer gallery={gallery} currentImageIndex={index} />
       ),
-      size: { width: 700, height: 550 },
+      size: { width: 340, height: 540 }, // Compact size for image viewing
     })
   }
 
   return (
     <div className={cn("image-gallery-grid h-full flex flex-col", className)}>
       {/* Grid layout that adapts to window size */}
-      <div className="flex-1 overflow-y-auto p-2">
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 max-w-full">
+      <div ref={containerRef} className="flex-1 overflow-y-auto p-2">
+        <div
+          className="grid gap-2 sm:gap-3 max-w-full"
+          style={{
+            gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
+          }}
+        >
           {gallery.images.map((image, index) => (
             <div
               key={index}

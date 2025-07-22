@@ -1,100 +1,96 @@
-import { useState, useEffect } from "react";
-import { ImageGallery } from "../../data/galleries";
-import { cn } from "../../utils/cn";
+import { useState, useEffect } from "react"
+import { ImageGallery } from "../../data/galleries"
+import { cn } from "../../utils/cn"
 
 interface ImageGalleryViewerProps {
-  gallery: ImageGallery;
-  currentImageIndex: number;
-  className?: string;
+  gallery: ImageGallery
+  currentImageIndex: number
+  className?: string
 }
 
-export function ImageGalleryViewer({ 
-  gallery, 
-  currentImageIndex, 
-  className 
+export function ImageGalleryViewer({
+  gallery,
+  currentImageIndex,
+  className,
 }: ImageGalleryViewerProps) {
-  const [currentIndex, setCurrentIndex] = useState(currentImageIndex);
-  const [imageLoading, setImageLoading] = useState(true);
-  
-  const currentImage = gallery.images[currentIndex];
-  const totalImages = gallery.images.length;
+  const [currentIndex, setCurrentIndex] = useState(currentImageIndex)
+  const [imageLoading, setImageLoading] = useState(true)
+
+  const currentImage = gallery.images[currentIndex]
+  const totalImages = gallery.images.length
 
   // Navigate to previous image
   const goToPrevious = () => {
-    setImageLoading(true);
-    setCurrentIndex((prev) => 
-      prev > 0 ? prev - 1 : totalImages - 1
-    );
-  };
+    setImageLoading(true)
+    setCurrentIndex((prev) => (prev > 0 ? prev - 1 : totalImages - 1))
+  }
 
   // Navigate to next image
   const goToNext = () => {
-    setImageLoading(true);
-    setCurrentIndex((prev) => 
-      prev < totalImages - 1 ? prev + 1 : 0
-    );
-  };
+    setImageLoading(true)
+    setCurrentIndex((prev) => (prev < totalImages - 1 ? prev + 1 : 0))
+  }
 
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       switch (event.key) {
-        case 'ArrowLeft':
-          event.preventDefault();
-          goToPrevious();
-          break;
-        case 'ArrowRight':
-          event.preventDefault();
-          goToNext();
-          break;
-        case 'Home':
-          event.preventDefault();
-          setImageLoading(true);
-          setCurrentIndex(0);
-          break;
-        case 'End':
-          event.preventDefault();
-          setImageLoading(true);
-          setCurrentIndex(totalImages - 1);
-          break;
+        case "ArrowLeft":
+          event.preventDefault()
+          goToPrevious()
+          break
+        case "ArrowRight":
+          event.preventDefault()
+          goToNext()
+          break
+        case "Home":
+          event.preventDefault()
+          setImageLoading(true)
+          setCurrentIndex(0)
+          break
+        case "End":
+          event.preventDefault()
+          setImageLoading(true)
+          setCurrentIndex(totalImages - 1)
+          break
         default:
-          break;
+          break
       }
-    };
+    }
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [totalImages]);
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [totalImages])
 
   const handleImageLoad = () => {
-    setImageLoading(false);
-  };
+    setImageLoading(false)
+  }
 
   if (!currentImage) {
     return (
       <div className="p-4 text-center">
         <p>No image found</p>
       </div>
-    );
+    )
   }
 
   return (
     <div className={cn("image-gallery-viewer h-full flex flex-col", className)}>
       {/* Navigation Header */}
       <div className="flex items-center justify-between p-2 border-b border-gray-400">
-        <button 
+        <button
           onClick={goToPrevious}
           className="px-3 py-1 bg-gray-300 border border-gray-400 hover:bg-gray-400 transition-colors"
           disabled={totalImages <= 1}
         >
           ← Previous
         </button>
-        
+
         <span className="text-sm font-['Pixelated MS Sans Serif']">
           {currentIndex + 1} of {totalImages}
         </span>
-        
-        <button 
+
+        <button
           onClick={goToNext}
           className="px-3 py-1 bg-gray-300 border border-gray-400 hover:bg-gray-400 transition-colors"
           disabled={totalImages <= 1}
@@ -108,18 +104,20 @@ export function ImageGalleryViewer({
         <div className="relative max-w-full max-h-full">
           {imageLoading && (
             <div className="absolute inset-0 flex items-center justify-center bg-gray-200 border border-gray-400">
-              <p className="text-sm font-['Pixelated MS Sans Serif']">Loading...</p>
+              <p className="text-sm font-['Pixelated MS Sans Serif']">
+                Loading...
+              </p>
             </div>
           )}
-          <img 
+          <img
             src={currentImage.src}
             alt={currentImage.alt}
             onLoad={handleImageLoad}
             className="max-w-full max-h-full object-contain border border-gray-400"
-            style={{ 
-              display: imageLoading ? 'none' : 'block',
-              minWidth: '200px',
-              minHeight: '150px'
+            style={{
+              display: imageLoading ? "none" : "block",
+              minWidth: "200px",
+              minHeight: "150px",
             }}
           />
         </div>
@@ -135,7 +133,7 @@ export function ImageGalleryViewer({
             {currentImage.alt}
           </p>
         )}
-        
+
         {/* Quick navigation hints */}
         <div className="mt-2 text-xs text-gray-500 font-['Pixelated MS Sans Serif']">
           Use ← → arrow keys to navigate
@@ -143,5 +141,5 @@ export function ImageGalleryViewer({
         </div>
       </div>
     </div>
-  );
+  )
 }

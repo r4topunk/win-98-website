@@ -119,7 +119,7 @@ franciscoskt/
   - Zoom-aware positioning calculations
   - Active window tracking and focus management
   - Navbar collision avoidance (40px bottom margin)
-  - Window sizing optimization (750×550 for galleries)
+  - Window sizing optimization (950×600 for galleries, wider for better content display)
 
 **Window.tsx**
 
@@ -203,7 +203,7 @@ franciscoskt/
 
 - **Purpose**: Grid-based image gallery display within windows
 - **Features**:
-  - Responsive 2/3 column grid layout (mobile/desktop)
+  - Container-width responsive grid layout (2-6+ columns based on window width)
   - Aspect-ratio preserved image thumbnails
   - Click-to-open image viewer functionality
   - Proper content containment and overflow handling
