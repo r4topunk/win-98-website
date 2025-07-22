@@ -1,8 +1,9 @@
-import { useWindowContext } from "../contexts/WindowContext";
-import { Window } from "./Window";
+import { useWindowContext } from "../contexts/WindowContext"
+import { Window } from "./Window"
 
 export function WindowManager() {
-  const { windows, closeWindow, focusWindow, activeWindowId } = useWindowContext();
+  const { windows, closeWindow, focusWindow, activeWindowId } =
+    useWindowContext()
 
   return (
     <>
@@ -18,10 +19,11 @@ export function WindowManager() {
           onFocus={() => focusWindow(window.id)}
           isActive={activeWindowId === window.id}
           style={{ zIndex: window.zIndex || 10 }}
+          noScroll={window.noScroll}
         >
           {window.content}
         </Window>
       ))}
     </>
-  );
+  )
 }

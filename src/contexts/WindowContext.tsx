@@ -15,6 +15,7 @@ export interface Window {
   position: { x: number; y: number }
   size?: { width: number; height: number }
   zIndex?: number
+  noScroll?: boolean // New prop for disabling scroll
 }
 
 interface WindowContextType {

@@ -94,10 +94,10 @@ export function ImageGalleryViewer({
           src={currentImage.src}
           alt={currentImage.alt}
           onLoad={handleImageLoad}
-          className="w-auto h-auto block"
+          className="h-auto block"
           style={{
             display: imageLoading ? "none" : "block",
-            minWidth: "200px",
+            width: "400px",
             minHeight: "150px",
           }}
         />

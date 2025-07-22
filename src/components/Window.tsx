@@ -20,6 +20,7 @@ interface WindowProps {
   onFocus?: () => void
   isActive?: boolean
   style?: CSSProperties
+  noScroll?: boolean // New prop to disable scrolling
 }
 
 export function Window({
@@ -33,6 +34,7 @@ export function Window({
   onFocus,
   isActive = true,
   style = {},
+  noScroll = false, // Default to false
 }: WindowProps) {
   const { setWindowPosition, setWindowSize, minimizeWindow } =
     useWindowContext()
@@ -307,7 +309,7 @@ export function Window({
       style={{
         left: `${position.x}px`,
         top: `${position.y}px`,
-        width: size?.width ? `${size.width}px` : "300px",
+        width: size?.width ? `${size.width}px` : noScroll ? "auto" : "300px",
         height: size?.height ? `${size.height}px` : "auto",
         maxWidth: "100%",
         maxHeight: "calc(100% - 30px)",
@@ -333,20 +335,34 @@ export function Window({
         </div>
       </div>
       <div
-        className="window-body relative flex-1 min-h-0"
-        style={{
-          overflow: "hidden", // Prevent content from overflowing the window
-          height: size?.height ? `${size.height - 60}px` : "calc(100% - 60px)", // Account for title bar
-        }}
+        className={cn("window-body relative", {
+          "flex-1 min-h-0": !noScroll,
+        })}
+        style={
+          noScroll
+            ? { overflow: "visible" }
+            : {
+                overflow: "hidden", // Prevent content from overflowing the window
+                height: size?.height
+                  ? `${size.height - 60}px`
+                  : "calc(100% - 60px)", // Account for title bar
+              }
+        }
       >
-        <div
-          className="h-full overflow-auto p-2"
-          style={{
-            maxHeight: "100%", // Ensure content scrolls within bounds
-          }}
-        >
-          {children}
-        </div>
+        {noScroll ? (
+          // No scroll mode: render children directly without scroll container
+          children
+        ) : (
+          // Default scroll mode: render children in scroll container
+          <div
+            className="h-full overflow-auto p-2"
+            style={{
+              maxHeight: "100%", // Ensure content scrolls within bounds
+            }}
+          >
+            {children}
+          </div>
+        )}
 
         {/* Resize handles */}
         <div
