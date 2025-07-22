@@ -310,7 +310,13 @@ export function Window({
         left: `${position.x}px`,
         top: `${position.y}px`,
         width: size?.width ? `${size.width}px` : noScroll ? "auto" : "300px",
-        height: size?.height ? `${size.height}px` : "auto",
+        // Only set height if not noScroll, otherwise let content (image) define height
+        height:
+          !noScroll && size?.height
+            ? `${size.height}px`
+            : noScroll
+            ? "auto"
+            : "auto",
         maxWidth: "100%",
         maxHeight: "calc(100% - 30px)",
         zIndex: isDragging || isResizing ? 9999 : style.zIndex || 10,
@@ -340,7 +346,7 @@ export function Window({
         })}
         style={
           noScroll
-            ? { overflow: "visible" }
+            ? { overflow: "visible", padding: 0 }
             : {
                 overflow: "hidden", // Prevent content from overflowing the window
                 height: size?.height
