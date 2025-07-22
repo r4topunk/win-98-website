@@ -1,13 +1,13 @@
-import { useState } from "react";
-import { ImageGalleryGrid } from "./gallery/ImageGalleryGrid";
-import { sampleGalleries } from "../data/galleries";
+import { useState } from "react"
+import { ImageGalleryGrid } from "./gallery/ImageGalleryGrid"
+import { sampleGalleries } from "../data/galleries"
 
 interface WindowContentsProps {
-  iconType: string;
+  iconType: string
 }
 
 export function WindowContents({ iconType }: WindowContentsProps) {
-  const [count, setCount] = useState(0);
+  const [count, setCount] = useState(0)
 
   // Different content based on which icon was clicked
   switch (iconType) {
@@ -18,7 +18,7 @@ export function WindowContents({ iconType }: WindowContentsProps) {
         <div className="p-2">
           <p>Gallery not found</p>
         </div>
-      );
+      )
 
     case "Images":
       return sampleGalleries.images ? (
@@ -27,7 +27,7 @@ export function WindowContents({ iconType }: WindowContentsProps) {
         <div className="p-2">
           <p>Gallery not found</p>
         </div>
-      );
+      )
 
     case "Album Covers":
       return sampleGalleries.albumCovers ? (
@@ -36,7 +36,7 @@ export function WindowContents({ iconType }: WindowContentsProps) {
         <div className="p-2">
           <p>Gallery not found</p>
         </div>
-      );
+      )
 
     case "Desenhe":
       return sampleGalleries.desenhe ? (
@@ -45,7 +45,25 @@ export function WindowContents({ iconType }: WindowContentsProps) {
         <div className="p-2">
           <p>Gallery not found</p>
         </div>
-      );
+      )
+
+    case "Pelo mundo":
+      return sampleGalleries.peloMundo ? (
+        <ImageGalleryGrid gallery={sampleGalleries.peloMundo} />
+      ) : (
+        <div className="p-2">
+          <p>Gallery not found</p>
+        </div>
+      )
+
+    case "Rejects":
+      return sampleGalleries.rejects ? (
+        <ImageGalleryGrid gallery={sampleGalleries.rejects} />
+      ) : (
+        <div className="p-2">
+          <p>Gallery not found</p>
+        </div>
+      )
 
     case "Computer":
       return (
@@ -58,7 +76,7 @@ export function WindowContents({ iconType }: WindowContentsProps) {
             </ul>
           </div>
         </div>
-      );
+      )
 
     case "Counter":
       return (
@@ -70,7 +88,7 @@ export function WindowContents({ iconType }: WindowContentsProps) {
             <button onClick={() => setCount(0)}>0</button>
           </div>
         </div>
-      );
+      )
 
     default:
       return (
@@ -81,6 +99,6 @@ export function WindowContents({ iconType }: WindowContentsProps) {
             <button>Cancel</button>
           </div>
         </div>
-      );
+      )
   }
 }
