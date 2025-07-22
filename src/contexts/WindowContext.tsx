@@ -141,7 +141,7 @@ export function WindowProvider({ children }: { children: ReactNode }) {
         isOpen: true,
         isMinimized: false,
         position: defaultPosition,
-        size: defaultSize,
+        size: window.size || defaultSize,
         zIndex: newZIndex,
       }
 

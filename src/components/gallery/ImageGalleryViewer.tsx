@@ -75,70 +75,32 @@ export function ImageGalleryViewer({
   }
 
   return (
-    <div className={cn("image-gallery-viewer h-full flex flex-col", className)}>
-      {/* Navigation Header */}
-      <div className="flex items-center justify-between p-2 border-b border-gray-400">
-        <button
-          onClick={goToPrevious}
-          className="px-3 py-1 bg-gray-300 border border-gray-400 hover:bg-gray-400 transition-colors"
-          disabled={totalImages <= 1}
-        >
-          ← Previous
-        </button>
-
-        <span className="text-sm font-['Pixelated MS Sans Serif']">
-          {currentIndex + 1} of {totalImages}
-        </span>
-
-        <button
-          onClick={goToNext}
-          className="px-3 py-1 bg-gray-300 border border-gray-400 hover:bg-gray-400 transition-colors"
-          disabled={totalImages <= 1}
-        >
-          Next →
-        </button>
-      </div>
-
+    <div
+      className={cn(
+        "image-gallery-viewer bg-gray-100 flex justify-center",
+        className
+      )}
+    >
       {/* Main Image Display */}
-      <div className="flex-1 flex items-center justify-center p-2 bg-gray-100 min-h-0">
-        <div className="relative max-w-full max-h-full">
-          {imageLoading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-gray-200 border border-gray-400">
-              <p className="text-sm font-['Pixelated MS Sans Serif']">
-                Loading...
-              </p>
-            </div>
-          )}
-          <img
-            src={currentImage.src}
-            alt={currentImage.alt}
-            onLoad={handleImageLoad}
-            className="max-w-full max-h-full object-contain border border-gray-400"
-            style={{
-              display: imageLoading ? "none" : "block",
-              minWidth: "200px",
-              minHeight: "150px",
-            }}
-          />
-        </div>
-      </div>
-
-      {/* Image Information */}
-      <div className="p-2 border-t border-gray-400 bg-gray-100">
-        <h4 className="font-bold font-['Pixelated MS Sans Serif'] mb-1">
-          {currentImage.title || `Image ${currentIndex + 1}`}
-        </h4>
-        {currentImage.title && (
-          <p className="text-xs text-gray-600 font-['Pixelated MS Sans Serif']">
-            {currentImage.alt}
-          </p>
+      <div className="relative">
+        {imageLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-200 border border-gray-400 min-w-[200px] min-h-[150px]">
+            <p className="text-sm font-['Pixelated MS Sans Serif']">
+              Loading...
+            </p>
+          </div>
         )}
-
-        {/* Quick navigation hints */}
-        <div className="mt-2 text-xs text-gray-500 font-['Pixelated MS Sans Serif']">
-          Use ← → arrow keys to navigate
-          {totalImages > 2 && " • Home/End for first/last"}
-        </div>
+        <img
+          src={currentImage.src}
+          alt={currentImage.alt}
+          onLoad={handleImageLoad}
+          className="w-auto h-auto block"
+          style={{
+            display: imageLoading ? "none" : "block",
+            minWidth: "200px",
+            minHeight: "150px",
+          }}
+        />
       </div>
     </div>
   )

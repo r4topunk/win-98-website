@@ -52,6 +52,15 @@ export function ImageGalleryGrid({
   const columns = getGridColumns(containerWidth)
 
   const handleImageClick = (image: GalleryImage, index: number) => {
+    // Determine appropriate viewer window size
+    const isMobile = window.innerWidth < 768
+    const viewerSize = isMobile
+      ? {
+          width: Math.min(280, window.innerWidth - 30),
+          height: Math.min(400, window.innerHeight - 140),
+        }
+      : { width: 500, height: 600 } // Larger size for better image viewing
+
     // Open image viewer window with full gallery context
     openWindow({
       id: `${gallery.id}-viewer-${index}`,
@@ -59,7 +68,7 @@ export function ImageGalleryGrid({
       content: (
         <ImageGalleryViewer gallery={gallery} currentImageIndex={index} />
       ),
-      size: { width: 340, height: 540 }, // Compact size for image viewing
+      size: viewerSize,
     })
   }
 
