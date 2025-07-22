@@ -10,6 +10,12 @@ export function DesktopIcon({ icon_path, icon_name }: DesktopIconProps) {
   const { openWindow } = useWindowContext();
 
   const handleIconClick = () => {
+    // Special case for Lojinha - open URL in new tab
+    if (icon_name === "Lojinha") {
+      window.open("https://franciscoskt.lojavirtualnuvem.com.br/", "_blank");
+      return;
+    }
+
     // Determine appropriate window size for gallery content
     const isGallery = ['Movies', 'Images', 'Album Covers', 'Desenhe'].includes(icon_name);
     
