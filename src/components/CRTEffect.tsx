@@ -12,13 +12,8 @@ export const CRTEffect: React.FC<CRTEffectProps> = ({ children }) => {
     const container = containerRef.current
     if (!container) return
 
-    // Reduced frequency flickering effect for better performance
-    const flickerInterval = setInterval(() => {
-      const brightness = 0.95 + Math.random() * 0.1
-      container.style.filter = `brightness(${brightness})`
-    }, 300) // Reduced from 100ms to 300ms
-
-    // Pause CRT effects during window dragging for better performance
+    // Remove flickering: set brightness to normal
+    container.style.filter = "brightness(1)"
 
     const handleDragStart = () => {
       setIsDragging(true)
@@ -47,7 +42,7 @@ export const CRTEffect: React.FC<CRTEffectProps> = ({ children }) => {
         setIsDragging(false)
         setTimeout(() => {
           if (container.style.filter === "brightness(1)") {
-            // Resume normal flickering after drag ends
+            // Resume normal (no flicker) after drag ends
           }
         }, 100)
       }
@@ -57,7 +52,6 @@ export const CRTEffect: React.FC<CRTEffectProps> = ({ children }) => {
     document.addEventListener("mouseup", handleMouseUp)
 
     return () => {
-      clearInterval(flickerInterval)
       document.removeEventListener("dragstart", handleDragStart)
       document.removeEventListener("dragend", handleDragEnd)
       document.removeEventListener("mousedown", handleMouseDown)
@@ -71,21 +65,16 @@ export const CRTEffect: React.FC<CRTEffectProps> = ({ children }) => {
       <div className="pointer-events-none fixed inset-0 z-[100]">
         {/* Scanlines - reduce animation complexity during drag */}
         <div
-          className={`absolute inset-0 bg-gradient-to-b from-transparent via-black/10 to-transparent bg-[length:100%_4px] ${
+          className={`absolute inset-0 bg-gradient-to-b from-transparent via-black/5 to-transparent bg-[length:100%_6px] ${
             isDragging ? "" : "animate-scan"
           }`}
         ></div>
 
         {/* Vignette effect */}
-        <div className="absolute inset-0 bg-radial-gradient opacity-50"></div>
+        <div className="absolute inset-0 bg-radial-gradient opacity-30"></div>
 
         {/* Screen curvature */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/5 via-transparent to-black/5"></div>
-
-        {/* Subtle noise texture - disable during drag for better performance */}
-        {!isDragging && (
-          <div className="absolute inset-0 opacity-[0.03] bg-noise"></div>
-        )}
       </div>
     </div>
   )
