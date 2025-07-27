@@ -277,26 +277,26 @@ export function Window({
 
   useEffect(() => {
     if (isDragging || isResizing) {
-      window.addEventListener("mousemove", handleMouseMove)
-      window.addEventListener("mouseup", handleMouseUp)
-      window.addEventListener("touchmove", handleTouchMove, { passive: false })
-      window.addEventListener("touchend", handleTouchEnd)
-    } else {
-      window.removeEventListener("mousemove", handleMouseMove)
-      window.removeEventListener("mouseup", handleMouseUp)
-      window.removeEventListener("touchmove", handleTouchMove)
-      window.removeEventListener("touchend", handleTouchEnd)
-    }
+      const handleGlobalMouseMove = (e: MouseEvent) => handleMouseMove(e)
+      const handleGlobalMouseUp = () => handleMouseUp()
+      const handleGlobalTouchMove = (e: TouchEvent) => handleTouchMove(e)
+      const handleGlobalTouchEnd = () => handleTouchEnd()
 
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove)
-      window.removeEventListener("mouseup", handleMouseUp)
-      window.removeEventListener("touchmove", handleTouchMove)
-      window.removeEventListener("touchend", handleTouchEnd)
-      // Ensure dragging class is removed on cleanup
-      document.body.classList.remove("dragging")
+      document.addEventListener("mousemove", handleGlobalMouseMove)
+      document.addEventListener("mouseup", handleGlobalMouseUp)
+      document.addEventListener("touchmove", handleGlobalTouchMove, { passive: false })
+      document.addEventListener("touchend", handleGlobalTouchEnd)
+
+      return () => {
+        document.removeEventListener("mousemove", handleGlobalMouseMove)
+        document.removeEventListener("mouseup", handleGlobalMouseUp)
+        document.removeEventListener("touchmove", handleGlobalTouchMove)
+        document.removeEventListener("touchend", handleGlobalTouchEnd)
+        // Ensure dragging class is removed on cleanup
+        document.body.classList.remove("dragging")
+      }
     }
-  }, [isDragging, isResizing, handleMouseMove]) // Simplified dependencies
+  }, [isDragging, isResizing, handleMouseMove])
 
   if (!isOpen) return null
 

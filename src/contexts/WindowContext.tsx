@@ -4,6 +4,7 @@ import {
   useState,
   ReactNode,
   useEffect,
+  useCallback,
 } from "react"
 
 export interface Window {
@@ -43,23 +44,34 @@ export function WindowProvider({ children }: { children: ReactNode }) {
     height: typeof window !== "undefined" ? window.innerHeight : 0,
   })
 
-  // Update screen dimensions and mobile status on resize
+  // Update screen dimensions and mobile status on resize with debouncing
   useEffect(() => {
+    let timeoutId: number
+    
     const handleResize = () => {
-      const width = window.innerWidth
-      const height = window.innerHeight
-      setScreenDimensions({ width, height })
-      setIsMobile(width < 768) // Common breakpoint for mobile
+      clearTimeout(timeoutId)
+      timeoutId = setTimeout(() => {
+        const width = window.innerWidth
+        const height = window.innerHeight
+        setScreenDimensions({ width, height })
+        setIsMobile(width < 768) // Common breakpoint for mobile
+      }, 100) // 100ms debounce
     }
 
     // Set initial values
-    handleResize()
+    const width = window.innerWidth
+    const height = window.innerHeight
+    setScreenDimensions({ width, height })
+    setIsMobile(width < 768)
 
     window.addEventListener("resize", handleResize)
-    return () => window.removeEventListener("resize", handleResize)
+    return () => {
+      clearTimeout(timeoutId)
+      window.removeEventListener("resize", handleResize)
+    }
   }, [])
 
-  const getDefaultWindowPosition = () => {
+  const getDefaultWindowPosition = useCallback(() => {
     // Default window size to calculate centering
     const defaultWidth = isMobile
       ? Math.min(320, screenDimensions.width - 20)
@@ -88,9 +100,9 @@ export function WindowProvider({ children }: { children: ReactNode }) {
       x: Math.max(0, centerX / zoom + limitedOffset / zoom),
       y: Math.max(0, centerY / zoom + limitedOffset / zoom),
     }
-  }
+  }, [screenDimensions, windows.length, isMobile])
 
-  const getDefaultWindowSize = () => {
+  const getDefaultWindowSize = useCallback(() => {
     if (isMobile) {
       // Constrain window size more tightly on mobile to prevent overlap with navbar
       return {
@@ -104,9 +116,9 @@ export function WindowProvider({ children }: { children: ReactNode }) {
       width: 740,
       height: 540,
     }
-  }
+  }, [isMobile, screenDimensions])
 
-  const openWindow = (
+  const openWindow = useCallback((
     window: Omit<Window, "isOpen" | "isMinimized" | "position" | "zIndex">
   ) => {
     setWindows((prev) => {
@@ -150,16 +162,16 @@ export function WindowProvider({ children }: { children: ReactNode }) {
 
       return [...prev, newWindow]
     })
-  }
+  }, [getDefaultWindowPosition, getDefaultWindowSize])
 
-  const closeWindow = (id: string) => {
+  const closeWindow = useCallback((id: string) => {
     setWindows((prev) => prev.filter((window) => window.id !== id))
     if (activeWindowId === id) {
       setActiveWindowId(null)
     }
-  }
+  }, [activeWindowId])
 
-  const minimizeWindow = (id: string) => {
+  const minimizeWindow = useCallback((id: string) => {
     setWindows((prev) =>
       prev.map((window) =>
         window.id === id ? { ...window, isMinimized: true } : window
@@ -168,9 +180,9 @@ export function WindowProvider({ children }: { children: ReactNode }) {
     if (activeWindowId === id) {
       setActiveWindowId(null)
     }
-  }
+  }, [activeWindowId])
 
-  const restoreWindow = (id: string) => {
+  const restoreWindow = useCallback((id: string) => {
     setWindows((prev) =>
       prev.map((window) =>
         window.id === id
@@ -179,9 +191,9 @@ export function WindowProvider({ children }: { children: ReactNode }) {
       )
     )
     setActiveWindowId(id)
-  }
+  }, [])
 
-  const focusWindow = (id: string) => {
+  const focusWindow = useCallback((id: string) => {
     setWindows((prev) =>
       prev.map((window) =>
         window.id === id
@@ -193,9 +205,9 @@ export function WindowProvider({ children }: { children: ReactNode }) {
       )
     )
     setActiveWindowId(id)
-  }
+  }, [])
 
-  const setWindowPosition = (
+  const setWindowPosition = useCallback((
     id: string,
     position: { x: number; y: number }
   ) => {
@@ -204,16 +216,16 @@ export function WindowProvider({ children }: { children: ReactNode }) {
         window.id === id ? { ...window, position } : window
       )
     )
-  }
+  }, [])
 
-  const setWindowSize = (
+  const setWindowSize = useCallback((
     id: string,
     size: { width: number; height: number }
   ) => {
     setWindows((prev) =>
       prev.map((window) => (window.id === id ? { ...window, size } : window))
     )
-  }
+  }, [])
 
   return (
     <WindowContext.Provider

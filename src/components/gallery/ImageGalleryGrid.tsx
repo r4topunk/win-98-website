@@ -34,10 +34,6 @@ export function ImageGalleryGrid({
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
         const newWidth = entry.contentRect.width
-        console.log(`🖼️ Gallery "${gallery.name}" container resized:`, {
-          width: newWidth,
-          columns: getGridColumns(newWidth),
-        })
         setContainerWidth(newWidth)
       }
     })
