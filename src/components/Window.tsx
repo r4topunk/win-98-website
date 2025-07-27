@@ -341,7 +341,7 @@ export function Window({
         </div>
       </div>
       <div
-        className={cn("window-body relative", {
+        className={cn("relative", {
           "flex-1 min-h-0": !noScroll,
         })}
         style={
@@ -350,8 +350,8 @@ export function Window({
             : {
                 overflow: "hidden", // Prevent content from overflowing the window
                 height: size?.height
-                  ? `${size.height - 60}px`
-                  : "calc(100% - 60px)", // Account for title bar
+                  ? `${size.height - 30}px`
+                  : "calc(100%)", // Account for title bar
               }
         }
       >
@@ -361,7 +361,7 @@ export function Window({
         ) : (
           // Default scroll mode: render children in scroll container
           <div
-            className="h-full overflow-auto p-2"
+            className="h-full overflow-auto"
             style={{
               maxHeight: "100%", // Ensure content scrolls within bounds
             }}

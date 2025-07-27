@@ -106,14 +106,6 @@ export function ImageGalleryGrid({
           ))}
         </div>
       </div>
-
-      {/* Gallery info */}
-      <div className="p-2 border-t border-gray-400 bg-gray-100 flex-shrink-0">
-        <p className="text-sm font-['Pixelated MS Sans Serif']">
-          {gallery.images.length} image{gallery.images.length !== 1 ? "s" : ""}{" "}
-          in {gallery.name}
-        </p>
-      </div>
     </div>
   )
 }
