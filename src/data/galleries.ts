@@ -235,8 +235,8 @@ export const sampleGalleries: Record<string, ImageGallery> = {
       },
     ],
   },
-  desenhe: {
-    id: "desenhe",
+  customs: {
+    id: "Customs",
     name: "Drawings & Illustrations",
     images: [
       {

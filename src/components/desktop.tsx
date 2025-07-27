@@ -29,7 +29,7 @@ export function Desktop() {
         />
         <DesktopIcon
           icon_path="/icons/network_internet_pcs_installer-4.png"
-          icon_name="Colabs"
+          icon_name="Customs"
         />
         <DesktopIcon icon_path="/icons/imaggif-1.png" icon_name="Desenhe" />
         <DesktopIcon icon_path="/icons/hardware-4.png" icon_name="W.I.P." />

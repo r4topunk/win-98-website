@@ -38,9 +38,9 @@ export function WindowContents({ iconType }: WindowContentsProps) {
         </div>
       )
 
-    case "Desenhe":
-      return sampleGalleries.desenhe ? (
-        <ImageGalleryGrid gallery={sampleGalleries.desenhe} />
+    case "Customs":
+      return sampleGalleries.customs ? (
+        <ImageGalleryGrid gallery={sampleGalleries.customs} />
       ) : (
         <div className="p-2">
           <p>Gallery not found</p>
