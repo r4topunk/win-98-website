@@ -16,6 +16,7 @@ export function ImageGalleryGrid({
   const { openWindow } = useWindowContext()
   const containerRef = useRef<HTMLDivElement>(null)
   const [containerWidth, setContainerWidth] = useState(0)
+  const [isMobile, setIsMobile] = useState(false)
 
   // Function to determine number of columns based on container width
   const getGridColumns = (width: number): number => {
@@ -26,29 +27,47 @@ export function ImageGalleryGrid({
     return 6 // 6+ columns for very wide windows
   }
 
-  // Track container width changes
+  // Track container width changes and mobile status
   useEffect(() => {
     const container = containerRef.current
     if (!container) return
+
+    const updateDimensions = () => {
+      const newWidth = container.offsetWidth
+      setContainerWidth(newWidth)
+      setIsMobile(window.innerWidth < 768)
+    }
 
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
         const newWidth = entry.contentRect.width
         setContainerWidth(newWidth)
+        setIsMobile(window.innerWidth < 768)
       }
     })
 
     resizeObserver.observe(container)
-    // Set initial width
-    setContainerWidth(container.offsetWidth)
+    updateDimensions()
 
-    return () => resizeObserver.disconnect()
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+
+    window.addEventListener("resize", handleResize)
+    return () => {
+      resizeObserver.disconnect()
+      window.removeEventListener("resize", handleResize)
+    }
   }, [])
 
   const columns = getGridColumns(containerWidth)
 
   const handleImageClick = (image: GalleryImage, index: number) => {
-    // Open image viewer window with 400px width and auto height
+    // Use mobile-optimized sizing for image viewer windows
+    const windowSize = isMobile
+      ? { width: Math.min(320, window.innerWidth - 20), height: 300 }
+      : { width: 400, height: 200 }
+
     openWindow({
       id: `${gallery.id}-viewer-${index}`,
       title: `${gallery.name} - ${image.title || `Image ${index + 1}`}`,
@@ -56,7 +75,7 @@ export function ImageGalleryGrid({
         <ImageGalleryViewer gallery={gallery} currentImageIndex={index} />
       ),
       noScroll: true, // Disable scroll to let image display at natural height
-      size: { width: 400, height: 200 }, // Set window width to 400px, minimal height (will grow with image)
+      size: windowSize,
     })
   }
 

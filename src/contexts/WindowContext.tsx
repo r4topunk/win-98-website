@@ -91,7 +91,15 @@ export function WindowProvider({ children }: { children: ReactNode }) {
     // Apply zoom correction if needed
     const zoom = parseFloat(getComputedStyle(document.body).zoom) || 1
 
-    // Add cascade effect for multiple windows
+    // On mobile, always center windows without cascade effect
+    if (isMobile) {
+      return {
+        x: Math.max(0, centerX / zoom),
+        y: Math.max(0, centerY / zoom),
+      }
+    }
+
+    // Add cascade effect for multiple windows (desktop only)
     const offset = windows.length * 30 // Increased offset for wider windows
     const maxOffset = Math.min(screenDimensions.width, availableHeight) * 0.15
     const limitedOffset = Math.min(offset, maxOffset)
