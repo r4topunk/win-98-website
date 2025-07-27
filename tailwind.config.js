@@ -4,13 +4,14 @@ export default {
   theme: {
     extend: {
       animation: {
-        scan: "scan 8s linear infinite",
-        fade: "fade 2s ease-in-out infinite",
+        scan: "scan 12s linear infinite",
+        fade: "fade 3s ease-in-out infinite",
+        "scan-slow": "scan 16s linear infinite",
       },
       keyframes: {
         scan: {
           "0%": { transform: "translateY(-100%)" },
-          "100%": { transform: "translateY(100%)" },
+          "100%": { transform: "translateY(100vh)" },
         },
         fade: {
           "0%, 100%": { opacity: "0.2" },

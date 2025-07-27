@@ -40,3 +40,22 @@
     }
   }
 }
+
+/* Performance optimizations for CRT effects */
+.crt-scanline {
+  contain: layout style paint;
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+.crt-scanline.paused {
+  animation-play-state: paused;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .animate-scan,
+  .animate-fade {
+    animation: none;
+  }
+}
