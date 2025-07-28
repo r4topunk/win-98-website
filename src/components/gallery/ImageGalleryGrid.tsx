@@ -21,9 +21,8 @@ export function ImageGalleryGrid({
   // Function to determine number of columns based on container width
   const getGridColumns = (width: number): number => {
     if (width < 400) return 2
-    if (width < 600) return 3
-    if (width < 800) return 4
-    if (width < 1000) return 5
+    if (width < 800) return 3
+    if (width < 1000) return 4
     return 6 // 6+ columns for very wide windows
   }
 
@@ -104,8 +103,6 @@ export function ImageGalleryGrid({
                   loading="lazy"
                   decoding="async"
                   style={{
-                    maxWidth: "200px",
-                    maxHeight: "200px",
                     willChange: "auto", // Prevent unnecessary GPU layers
                   }}
                 />
