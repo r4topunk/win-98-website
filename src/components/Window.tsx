@@ -18,7 +18,6 @@ interface WindowProps {
   size?: { width: number; height: number }
   onClose: () => void
   onFocus?: () => void
-  isActive?: boolean
   style?: CSSProperties
   noScroll?: boolean // New prop to disable scrolling
 }
@@ -32,7 +31,6 @@ export function Window({
   size,
   onClose,
   onFocus,
-  isActive = true,
   style = {},
   noScroll = false, // Default to false
 }: WindowProps) {
@@ -60,8 +58,6 @@ export function Window({
     // Only allow dragging from the title bar
     if ((e.target as HTMLElement).closest(".title-bar")) {
       e.preventDefault() // Prevent default drag behavior
-      // Focus window immediately when starting to drag
-      onFocus?.()
       setIsDragging(true)
 
       // Add dragging class to body to prevent text selection
@@ -213,8 +209,6 @@ export function Window({
   const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
     if ((e.target as HTMLElement).closest(".title-bar")) {
       e.preventDefault() // Prevent default touch behavior
-      // Focus window immediately when starting to drag
-      onFocus?.()
       setIsDragging(true)
 
       // Add dragging class to body to prevent text selection
@@ -303,9 +297,7 @@ export function Window({
   return (
     <div
       ref={windowRef}
-      className={cn("window absolute shadow-md", {
-        "opacity-90": !isActive,
-      })}
+      className="window absolute shadow-md"
       style={{
         left: `${position.x}px`,
         top: `${position.y}px`,
@@ -319,18 +311,19 @@ export function Window({
             : "auto",
         maxWidth: "100%",
         maxHeight: "calc(100% - 30px)",
+        ...style,
         zIndex: isDragging || isResizing ? 9999 : style.zIndex || 10,
         transform: isDragging || isResizing ? "translateZ(0)" : "none", // Force GPU acceleration during drag
-        ...style,
       }}
       onMouseDown={(e) => {
-        // Focus window on click (for non-title bar clicks)
-        if (!(e.target as HTMLElement).closest(".title-bar")) {
-          onFocus?.()
-        }
+        // Focus window on any click
+        onFocus?.()
         handleMouseDown(e)
       }}
-      onTouchStart={handleTouchStart}
+      onTouchStart={(e) => {
+        onFocus?.()
+        handleTouchStart(e)
+      }}
     >
       <div className="title-bar cursor-move">
         <div className="title-bar-text">{title}</div>

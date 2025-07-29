@@ -143,7 +143,7 @@ export function WindowProvider({ children }: { children: ReactNode }) {
           ...existingWindow,
           isOpen: true,
           isMinimized: false,
-          zIndex: Math.max(...prev.map((w) => w.zIndex || 0)) + 1,
+          zIndex: Math.max(...prev.map((w) => w.zIndex || 0), 0) + 1,
         }
 
         updatedWindows.push(focusedWindow)
@@ -154,7 +154,7 @@ export function WindowProvider({ children }: { children: ReactNode }) {
 
       const defaultPosition = getDefaultWindowPosition()
       const defaultSize = getDefaultWindowSize()
-      const newZIndex = Math.max(...prev.map((w) => w.zIndex || 0)) + 1
+      const newZIndex = Math.max(...prev.map((w) => w.zIndex || 0), 0) + 1
 
       // Otherwise add new window with default position
       const newWindow = {
@@ -202,16 +202,17 @@ export function WindowProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const focusWindow = useCallback((id: string) => {
-    setWindows((prev) =>
-      prev.map((window) =>
+    setWindows((prev) => {
+      const maxZ = Math.max(...prev.map((w) => w.zIndex || 0), 0)
+      return prev.map((window) =>
         window.id === id
           ? {
               ...window,
-              zIndex: Math.max(...prev.map((w) => w.zIndex || 0)) + 1,
+              zIndex: maxZ + 1,
             }
           : window
       )
-    )
+    })
     setActiveWindowId(id)
   }, [])
 
