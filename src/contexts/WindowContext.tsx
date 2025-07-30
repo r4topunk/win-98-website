@@ -221,25 +221,37 @@ export function WindowProvider({ children }: { children: ReactNode }) {
               originalSize: undefined,
             }
           } else {
-            // Go fullscreen - navbar is at bottom, so use container height minus navbar
-            const navbarHeight = 32
-            // Get the actual desktop container dimensions
-            const desktopContainer = document.querySelector('.desktop-background')
-            const containerRect = desktopContainer?.getBoundingClientRect()
+            // Go fullscreen - position relative to the main desktop container
+            const mainContainer = document.querySelector('.desktop-background') // The main container
+            const navbar = document.querySelector('.window.h-8') // The navbar element
+            const containerRect = mainContainer?.getBoundingClientRect()
+            const navbarHeight = navbar?.getBoundingClientRect().height || 32
             
-            const availableWidth = containerRect?.width || screenDimensions.width
-            const availableHeight = containerRect?.height || screenDimensions.height
-            
-            return {
-              ...window,
-              isFullscreen: true,
-              originalPosition: window.position,
-              originalSize: window.size,
-              position: { x: 0, y: 0 },
-              size: {
-                width: availableWidth,
-                height: availableHeight - navbarHeight,
-              },
+            if (containerRect) {
+              return {
+                ...window,
+                isFullscreen: true,
+                originalPosition: window.position,
+                originalSize: window.size,
+                position: { x: containerRect.left, y: containerRect.top },
+                size: {
+                  width: containerRect.width,
+                  height: containerRect.height - navbarHeight,
+                },
+              }
+            } else {
+              // Fallback if container not found
+              return {
+                ...window,
+                isFullscreen: true,
+                originalPosition: window.position,
+                originalSize: window.size,
+                position: { x: 0, y: 0 },
+                size: {
+                  width: screenDimensions.width,
+                  height: screenDimensions.height - 32,
+                },
+              }
             }
           }
         }

@@ -305,8 +305,9 @@ export function Window({
         top: `${position.y}px`,
         width: size?.width ? `${size.width}px` : noScroll ? "auto" : "300px",
         // Only set height if not noScroll, otherwise let content (image) define height
-        height:
-          !noScroll && size?.height
+        height: isFullscreen && size?.height
+          ? `${size.height}px`
+          : !noScroll && size?.height
             ? `${size.height}px`
             : noScroll
             ? "auto"
@@ -338,17 +339,16 @@ export function Window({
       <div
         className={cn("relative", {
           "flex-1 min-h-0": !noScroll || isFullscreen,
+          "h-full": isFullscreen && noScroll,
         })}
         style={
           noScroll
             ? { 
                 overflow: isFullscreen ? "hidden" : "visible", 
                 padding: 0,
-                height: isFullscreen && size?.height 
-                  ? `${size.height - 30}px` 
-                  : isFullscreen 
-                    ? "calc(100% - 30px)" 
-                    : "auto"
+                height: isFullscreen 
+                  ? "calc(100% - 30px)" // Always use calc in fullscreen for proper height
+                  : "auto"
               }
             : {
                 overflow: "hidden", // Prevent content from overflowing the window
