@@ -66,11 +66,17 @@ export function ImageGalleryGrid({
       ? { width: Math.min(320, window.innerWidth - 20), height: 300 }
       : { width: 400, height: 200 }
 
+    const windowId = `${gallery.id}-viewer-${index}`
+
     openWindow({
-      id: `${gallery.id}-viewer-${index}`,
+      id: windowId,
       title: `${gallery.name} - ${image.title || `Image ${index + 1}`}`,
       content: (
-        <ImageGalleryViewer gallery={gallery} currentImageIndex={index} />
+        <ImageGalleryViewer 
+          gallery={gallery} 
+          currentImageIndex={index} 
+          windowId={windowId}
+        />
       ),
       noScroll: true, // Disable scroll to let image display at natural height
       size: windowSize,

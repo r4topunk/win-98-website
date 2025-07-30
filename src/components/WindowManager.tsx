@@ -18,6 +18,7 @@ export function WindowManager() {
           onFocus={() => focusWindow(window.id)}
           style={{ zIndex: window.zIndex || 10 }}
           noScroll={window.noScroll}
+          isFullscreen={window.isFullscreen}
         >
           {window.content}
         </Window>

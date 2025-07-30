@@ -31,7 +31,7 @@ export function DesktopIcon({ icon_path, icon_name }: DesktopIconProps) {
             width: Math.min(320, window.innerWidth - 20),
             height: Math.min(400, window.innerHeight - 140),
           }
-        : { width: 950, height: 600 } // Much wider for better gallery layout
+        : { width: 740, height: 540 } // Same size as Computer window
     } else {
       windowSize = isMobile
         ? {

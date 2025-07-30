@@ -20,6 +20,7 @@ interface WindowProps {
   onFocus?: () => void
   style?: CSSProperties
   noScroll?: boolean // New prop to disable scrolling
+  isFullscreen?: boolean // New prop to indicate fullscreen state
 }
 
 export function Window({
@@ -33,8 +34,9 @@ export function Window({
   onFocus,
   style = {},
   noScroll = false, // Default to false
+  isFullscreen = false, // Default to false
 }: WindowProps) {
-  const { setWindowPosition, setWindowSize, minimizeWindow } =
+  const { setWindowPosition, setWindowSize, minimizeWindow, maximizeWindow } =
     useWindowContext()
   const [isDragging, setIsDragging] = useState(false)
   const [isResizing, setIsResizing] = useState(false)
@@ -310,7 +312,7 @@ export function Window({
             ? "auto"
             : "auto",
         maxWidth: "100%",
-        maxHeight: "calc(100% - 30px)",
+        maxHeight: isFullscreen ? "100%" : "calc(100% - 30px)",
         ...style,
         zIndex: isDragging || isResizing ? 9999 : style.zIndex || 10,
         transform: isDragging || isResizing ? "translateZ(0)" : "none", // Force GPU acceleration during drag
@@ -329,17 +331,25 @@ export function Window({
         <div className="title-bar-text">{title}</div>
         <div className="title-bar-controls">
           <button aria-label="Minimize" onClick={() => minimizeWindow(id)} />
-          <button aria-label="Maximize" />
+          <button aria-label="Maximize" onClick={() => maximizeWindow(id)} />
           <button aria-label="Close" onClick={onClose} />
         </div>
       </div>
       <div
         className={cn("relative", {
-          "flex-1 min-h-0": !noScroll,
+          "flex-1 min-h-0": !noScroll || isFullscreen,
         })}
         style={
           noScroll
-            ? { overflow: "visible", padding: 0 }
+            ? { 
+                overflow: isFullscreen ? "hidden" : "visible", 
+                padding: 0,
+                height: isFullscreen && size?.height 
+                  ? `${size.height - 30}px` 
+                  : isFullscreen 
+                    ? "calc(100% - 30px)" 
+                    : "auto"
+              }
             : {
                 overflow: "hidden", // Prevent content from overflowing the window
                 height: size?.height

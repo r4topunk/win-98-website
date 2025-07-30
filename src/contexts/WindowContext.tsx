@@ -13,21 +13,25 @@ export interface Window {
   content: ReactNode
   isOpen: boolean
   isMinimized: boolean
+  isFullscreen: boolean
   position: { x: number; y: number }
   size?: { width: number; height: number }
   zIndex?: number
   noScroll?: boolean // New prop for disabling scroll
+  originalPosition?: { x: number; y: number }
+  originalSize?: { width: number; height: number }
 }
 
 interface WindowContextType {
   windows: Window[]
   activeWindowId: string | null
   openWindow: (
-    window: Omit<Window, "isOpen" | "isMinimized" | "position" | "zIndex">
+    window: Omit<Window, "isOpen" | "isMinimized" | "isFullscreen" | "position" | "zIndex" | "originalPosition" | "originalSize">
   ) => void
   closeWindow: (id: string) => void
   minimizeWindow: (id: string) => void
   restoreWindow: (id: string) => void
+  maximizeWindow: (id: string) => void
   focusWindow: (id: string) => void
   setWindowPosition: (id: string, position: { x: number; y: number }) => void
   setWindowSize: (id: string, size: { width: number; height: number }) => void
@@ -127,7 +131,7 @@ export function WindowProvider({ children }: { children: ReactNode }) {
   }, [isMobile, screenDimensions])
 
   const openWindow = useCallback((
-    window: Omit<Window, "isOpen" | "isMinimized" | "position" | "zIndex">
+    window: Omit<Window, "isOpen" | "isMinimized" | "isFullscreen" | "position" | "zIndex" | "originalPosition" | "originalSize">
   ) => {
     setWindows((prev) => {
       // Check if window already exists
@@ -161,6 +165,7 @@ export function WindowProvider({ children }: { children: ReactNode }) {
         ...window,
         isOpen: true,
         isMinimized: false,
+        isFullscreen: false,
         position: defaultPosition,
         size: window.size || defaultSize,
         zIndex: newZIndex,
@@ -200,6 +205,48 @@ export function WindowProvider({ children }: { children: ReactNode }) {
     )
     setActiveWindowId(id)
   }, [])
+
+  const maximizeWindow = useCallback((id: string) => {
+    setWindows((prev) =>
+      prev.map((window) => {
+        if (window.id === id) {
+          if (window.isFullscreen) {
+            // Restore from fullscreen
+            return {
+              ...window,
+              isFullscreen: false,
+              position: window.originalPosition || window.position,
+              size: window.originalSize || window.size,
+              originalPosition: undefined,
+              originalSize: undefined,
+            }
+          } else {
+            // Go fullscreen - navbar is at bottom, so use container height minus navbar
+            const navbarHeight = 32
+            // Get the actual desktop container dimensions
+            const desktopContainer = document.querySelector('.desktop-background')
+            const containerRect = desktopContainer?.getBoundingClientRect()
+            
+            const availableWidth = containerRect?.width || screenDimensions.width
+            const availableHeight = containerRect?.height || screenDimensions.height
+            
+            return {
+              ...window,
+              isFullscreen: true,
+              originalPosition: window.position,
+              originalSize: window.size,
+              position: { x: 0, y: 0 },
+              size: {
+                width: availableWidth,
+                height: availableHeight - navbarHeight,
+              },
+            }
+          }
+        }
+        return window
+      })
+    )
+  }, [screenDimensions])
 
   const focusWindow = useCallback((id: string) => {
     setWindows((prev) => {
@@ -245,6 +292,7 @@ export function WindowProvider({ children }: { children: ReactNode }) {
         closeWindow,
         minimizeWindow,
         restoreWindow,
+        maximizeWindow,
         focusWindow,
         setWindowPosition,
         setWindowSize,

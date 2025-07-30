@@ -1,20 +1,28 @@
 import { useState, useEffect } from "react"
 import { ImageGallery } from "../../data/galleries"
 import { cn } from "../../utils/cn"
+import { useWindowContext } from "../../contexts/WindowContext"
 
 interface ImageGalleryViewerProps {
   gallery: ImageGallery
   currentImageIndex: number
   className?: string
+  windowId?: string
 }
 
 export function ImageGalleryViewer({
   gallery,
   currentImageIndex,
   className,
+  windowId,
 }: ImageGalleryViewerProps) {
+  const { windows } = useWindowContext()
   const [currentIndex, setCurrentIndex] = useState(currentImageIndex)
   const [imageLoading, setImageLoading] = useState(true)
+
+  // Find the current window to check if it's fullscreen
+  const currentWindow = windowId ? windows.find(w => w.id === windowId) : null
+  const isFullscreen = currentWindow?.isFullscreen || false
 
   const currentImage = gallery.images[currentIndex]
   const totalImages = gallery.images.length
@@ -78,13 +86,20 @@ export function ImageGalleryViewer({
     <div
       className={cn(
         "image-gallery-viewer bg-gray-100 flex justify-center",
+        isFullscreen ? "items-center w-full h-full" : "",
         className
       )}
     >
       {/* Main Image Display */}
-      <div className="relative">
+      <div className={cn(
+        "relative",
+        isFullscreen ? "flex justify-center items-center w-full h-full" : ""
+      )}>
         {imageLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-200 border border-gray-400 min-w-[200px] min-h-[150px]">
+          <div className={cn(
+            "absolute inset-0 flex items-center justify-center bg-gray-200 border border-gray-400",
+            !isFullscreen && "min-w-[200px] min-h-[150px]"
+          )}>
             <p className="text-sm font-['Pixelated MS Sans Serif']">
               Loading...
             </p>
@@ -94,11 +109,15 @@ export function ImageGalleryViewer({
           src={currentImage.src}
           alt={currentImage.alt}
           onLoad={handleImageLoad}
-          className="h-auto block"
+          className={cn(
+            isFullscreen ? "max-w-full max-h-full object-contain" : "h-auto block"
+          )}
           style={{
             display: imageLoading ? "none" : "block",
-            width: "400px",
-            minHeight: "150px",
+            ...(isFullscreen ? {} : {
+              width: "400px",
+              minHeight: "150px",
+            }),
           }}
         />
       </div>
