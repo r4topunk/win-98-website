@@ -59,3 +59,51 @@
     animation: none;
   }
 }
+
+/* Disable mobile gestures that interfere with window interactions */
+html, body {
+  /* Disable pull-to-refresh */
+  overscroll-behavior: none;
+  
+  /* Disable pinch-to-zoom */
+  touch-action: manipulation;
+  
+  /* Disable double-tap zoom */
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Specifically disable gestures on desktop background and windows */
+.desktop-background,
+.window {
+  /* Prevent pull-to-refresh and bounce scrolling */
+  overscroll-behavior: none;
+  
+  /* Allow only pan gestures, disable pinch zoom */
+  touch-action: pan-x pan-y;
+}
+
+/* For window title bars, completely disable touch actions except for dragging */
+.title-bar {
+  /* Only allow panning for dragging, no zoom or other gestures */
+  touch-action: none;
+}
+
+/* Re-enable scrolling inside window content areas */
+.window .h-full.overflow-auto {
+  touch-action: auto;
+}
+
+/* Disable iOS Safari bounce effect */
+@supports (-webkit-touch-callout: none) {
+  html, body {
+    -webkit-overflow-scrolling: touch;
+    height: 100%;
+    overflow: hidden;
+  }
+  
+  /* Allow scrolling only on specific scrollable containers */
+  .overflow-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+}
