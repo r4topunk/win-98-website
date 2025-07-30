@@ -20,9 +20,16 @@ export const IntroVideo = ({ onComplete }: IntroVideoProps) => {
     if (!video) return;
 
     const handleCanPlay = () => {
+      // Set playback rate to 2x for both mobile and desktop
+      video.playbackRate = 2.0;
+      
+      // Ensure autoplay works on mobile by attempting play immediately
       video.play().catch((err) => {
         console.error('Error playing video:', err);
-        setError(true);
+        // On mobile, sometimes we need to retry play after a brief delay
+        setTimeout(() => {
+          video.play().catch(() => setError(true));
+        }, 100);
       });
     };
 
