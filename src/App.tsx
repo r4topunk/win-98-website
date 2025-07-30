@@ -54,7 +54,7 @@ function App() {
         <VintageTransition onComplete={handleTransitionComplete} />
       )}
       <CRTEffect>
-        <div className="bg-[url('/bg.jpg')] bg-cover bg-no-repeat bg-center relative overflow-hidden flex flex-col h-[100dvh] md:h-[80vh] desktop-background">
+        <div className="bg-[url('/site_images/ui/background.webp')] bg-cover bg-no-repeat bg-center relative overflow-hidden flex flex-col h-[100dvh] md:h-[80vh] desktop-background">
           <Desktop />
           <WindowManager />
           <Navbar openStartMenu={() => setIsMenuOpen(!isMenuOpen)} />
