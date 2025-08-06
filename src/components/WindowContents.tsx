@@ -79,6 +79,19 @@ export function WindowContents({ iconType }: WindowContentsProps) {
         </div>
       )
 
+    case "???":
+      return sampleGalleries.pix ? (
+        <ImageGalleryViewer 
+          gallery={sampleGalleries.pix} 
+          currentImageIndex={0}
+          windowId="pix-viewer"
+        />
+      ) : (
+        <div className="p-2">
+          <p>Pix application not found</p>
+        </div>
+      )
+
     case "Computer":
       return (
         <div className="p-2">

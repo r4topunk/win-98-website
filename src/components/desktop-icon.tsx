@@ -19,6 +19,7 @@ export function DesktopIcon({ icon_path, icon_name }: DesktopIconProps) {
     // Determine appropriate window size for gallery content
     const isGallery = ["Movies", "Images", "Album Covers"].includes(icon_name)
     const isPaint = icon_name === "Desenhe"
+    const isPix = icon_name === "???"
 
     // Check if mobile (basic check since we don't have access to WindowContext state here)
     const isMobile = window.innerWidth < 768
@@ -44,6 +45,30 @@ export function DesktopIcon({ icon_path, icon_name }: DesktopIconProps) {
         title: icon_name,
         content: <WindowContents iconType={icon_name} />,
         size: dynamicWindowSize,
+        noScroll: true,
+      })
+      return
+    } else if (isPix) {
+      // For pix, calculate window size using the known image dimensions: 3028 × 4961
+      const imageAspectRatio = 3028 / 4961 // ≈ 0.610
+      const pixWidth = isMobile ? Math.min(350, window.innerWidth - 20) : 350
+      
+      // Calculate height from width using the aspect ratio, then add space for window chrome
+      const imageHeight = pixWidth / imageAspectRatio
+      const windowChromeHeight = 30 // Account for title bar and borders
+      const pixHeight = Math.round(imageHeight + windowChromeHeight)
+      
+      const dynamicWindowSize = { 
+        width: Math.round(pixWidth), 
+        height: pixHeight 
+      }
+      
+      openWindow({
+        id: "pix-viewer",
+        title: icon_name,
+        content: <WindowContents iconType={icon_name} />,
+        size: dynamicWindowSize,
+        noScroll: true,
       })
       return
     } else if (isGallery) {

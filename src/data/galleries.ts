@@ -480,6 +480,17 @@ export const sampleGalleries: Record<string, ImageGallery> = {
       },
     ],
   },
+  pix: {
+    id: "pix",
+    name: "Pix",
+    images: [
+      {
+        src: "/site_images/ui/pix.webp",
+        alt: "Pix Application",
+        title: "Pix",
+      },
+    ],
+  },
 }
 
 // Helper function to get gallery by ID
