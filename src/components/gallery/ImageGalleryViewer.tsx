@@ -93,7 +93,7 @@ export function ImageGalleryViewer({
       {/* Main Image Display */}
       <div className={cn(
         "relative",
-        isFullscreen ? "flex justify-center items-center w-full h-full" : ""
+        isFullscreen ? "flex justify-center items-center w-full h-full" : "w-full h-full flex justify-center items-center"
       )}>
         {imageLoading && (
           <div className={cn(
