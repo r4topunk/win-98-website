@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { ImageGalleryGrid } from "./gallery/ImageGalleryGrid"
+import { ImageGalleryViewer } from "./gallery/ImageGalleryViewer"
 import { sampleGalleries } from "../data/galleries"
 
 interface WindowContentsProps {
@@ -62,6 +63,19 @@ export function WindowContents({ iconType }: WindowContentsProps) {
       ) : (
         <div className="p-2">
           <p>Gallery not found</p>
+        </div>
+      )
+
+    case "Desenhe":
+      return sampleGalleries.paint ? (
+        <ImageGalleryViewer 
+          gallery={sampleGalleries.paint} 
+          currentImageIndex={0}
+          windowId="desenhe"
+        />
+      ) : (
+        <div className="p-2">
+          <p>Paint application not found</p>
         </div>
       )
 

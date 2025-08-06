@@ -115,8 +115,9 @@ export function ImageGalleryViewer({
           style={{
             display: imageLoading ? "none" : "block",
             ...(isFullscreen ? {} : {
-              width: "400px",
-              minHeight: "150px",
+              width: "100%",
+              height: "100%",
+              objectFit: "contain",
             }),
           }}
         />

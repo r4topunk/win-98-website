@@ -458,6 +458,17 @@ export const sampleGalleries: Record<string, ImageGallery> = {
       },
     ],
   },
+  paint: {
+    id: "paint",
+    name: "Paint",
+    images: [
+      {
+        src: "/site_images/ui/paint.webp",
+        alt: "Paint Application",
+        title: "Paint",
+      },
+    ],
+  },
 }
 
 // Helper function to get gallery by ID
