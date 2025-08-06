@@ -491,6 +491,17 @@ export const sampleGalleries: Record<string, ImageGallery> = {
       },
     ],
   },
+  campominado: {
+    id: "campominado",
+    name: "Campominado",
+    images: [
+      {
+        src: "/site_images/ui/campominado.webp",
+        alt: "Campominado Game",
+        title: "Campominado",
+      },
+    ],
+  },
 }
 
 // Helper function to get gallery by ID

@@ -20,6 +20,7 @@ export function DesktopIcon({ icon_path, icon_name }: DesktopIconProps) {
     const isGallery = ["Movies", "Images", "Album Covers"].includes(icon_name)
     const isPaint = icon_name === "Desenhe"
     const isPix = icon_name === "???"
+    const isError = icon_name === "Error"
 
     // Check if mobile (basic check since we don't have access to WindowContext state here)
     const isMobile = window.innerWidth < 768
@@ -65,6 +66,29 @@ export function DesktopIcon({ icon_path, icon_name }: DesktopIconProps) {
       
       openWindow({
         id: "pix-viewer",
+        title: icon_name,
+        content: <WindowContents iconType={icon_name} />,
+        size: dynamicWindowSize,
+        noScroll: true,
+      })
+      return
+    } else if (isError) {
+      // For campominado, calculate window size using the known image dimensions: 2970 × 3776
+      const imageAspectRatio = 2970 / 3776 // ≈ 0.786
+      const errorWidth = isMobile ? Math.min(350, window.innerWidth - 20) : 300
+      
+      // Calculate height from width using the aspect ratio, then add space for window chrome
+      const imageHeight = errorWidth / imageAspectRatio
+      const windowChromeHeight = 30 // Account for title bar and borders
+      const errorHeight = Math.round(imageHeight + windowChromeHeight)
+      
+      const dynamicWindowSize = { 
+        width: Math.round(errorWidth), 
+        height: errorHeight 
+      }
+      
+      openWindow({
+        id: "campominado-viewer",
         title: icon_name,
         content: <WindowContents iconType={icon_name} />,
         size: dynamicWindowSize,

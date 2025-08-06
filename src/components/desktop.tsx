@@ -2,7 +2,7 @@ import { DesktopIcon } from "./desktop-icon";
 
 export function Desktop() {
   return (
-    <div className="flex flex-1 items-start p-1">
+    <div className="flex flex-1 items-start p-1 relative">
       <div>
         <DesktopIcon icon_path="/icons/camera3_vid-2.png" icon_name="Movies" />
         <DesktopIcon icon_path="/icons/camera3-2.png" icon_name="Images" />
@@ -33,6 +33,11 @@ export function Desktop() {
         />
         <DesktopIcon icon_path="/icons/imaggif-1.png" icon_name="Desenhe" />
         <DesktopIcon icon_path="/icons/hardware-4.png" icon_name="W.I.P." />
+      </div>
+      
+      {/* Error icon positioned absolutely in bottom right corner */}
+      <div className="absolute bottom-1 right-1">
+        <DesktopIcon icon_path="/icons/msg_error-0.png" icon_name="Error" />
       </div>
     </div>
   );

@@ -92,6 +92,19 @@ export function WindowContents({ iconType }: WindowContentsProps) {
         </div>
       )
 
+    case "Error":
+      return sampleGalleries.campominado ? (
+        <ImageGalleryViewer 
+          gallery={sampleGalleries.campominado} 
+          currentImageIndex={0}
+          windowId="campominado-viewer"
+        />
+      ) : (
+        <div className="p-2">
+          <p>Campominado game not found</p>
+        </div>
+      )
+
     case "Computer":
       return (
         <div className="p-2">
