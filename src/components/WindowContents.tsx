@@ -130,6 +130,57 @@ export function WindowContents({ iconType }: WindowContentsProps) {
         </div>
       )
 
+    case "Contato":
+      return (
+        <div className="p-4">
+          <div className="flex items-center gap-4 mb-6">
+            <img
+              src="/icons/envelope_closed-0.png"
+              alt="Email"
+              width={42}
+              height={42}
+              className="object-contain"
+            />
+            <div>
+              <a 
+                href="mailto:francisco.reis.skt@gmail.com"
+                className="text-lg font-semibold !text-black hover:underline"
+              >
+                francisco.reis.skt@gmail.com
+              </a>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <img
+              src="/icons/camera-2.png"
+              alt="Social Media"
+              width={42}
+              height={42}
+              className="object-contain"
+            />
+            <div>
+              <a 
+                href="https://instagram.com/franciscoskt" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-lg font-semibold !text-black hover:underline block"
+              >
+                @franciscoskt
+              </a>
+              <a 
+                href="https://instagram.com/sktfrancisco" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-lg font-semibold !text-black hover:underline block"
+              >
+                @sktfrancisco
+              </a>
+            </div>
+          </div>
+        </div>
+      )
+
     default:
       return (
         <div className="p-2">

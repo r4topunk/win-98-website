@@ -21,6 +21,7 @@ export function DesktopIcon({ icon_path, icon_name }: DesktopIconProps) {
     const isPaint = icon_name === "Desenhe"
     const isPix = icon_name === "???"
     const isError = icon_name === "Error"
+    const isContact = icon_name === "Contato"
 
     // Check if mobile (basic check since we don't have access to WindowContext state here)
     const isMobile = window.innerWidth < 768
@@ -92,6 +93,23 @@ export function DesktopIcon({ icon_path, icon_name }: DesktopIconProps) {
         title: icon_name,
         content: <WindowContents iconType={icon_name} />,
         size: dynamicWindowSize,
+        noScroll: true,
+      })
+      return
+    } else if (isContact) {
+      // For contact, use a smaller window that fits the content
+      const contactSize = isMobile
+        ? {
+            width: Math.min(320, window.innerWidth - 20),
+            height: 200,
+          }
+        : { width: 400, height: 200 }
+      
+      openWindow({
+        id: "contato",
+        title: icon_name,
+        content: <WindowContents iconType={icon_name} />,
+        size: contactSize,
         noScroll: true,
       })
       return
