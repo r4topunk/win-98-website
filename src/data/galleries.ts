@@ -2,6 +2,7 @@ export interface GalleryImage {
   src: string
   alt: string
   title?: string
+  link?: string
 }
 
 export interface ImageGallery {
@@ -187,21 +188,25 @@ export const sampleGalleries: Record<string, ImageGallery> = {
         src: "/site_images/album_covers/1.webp",
         alt: "Tô no corre - pdR.",
         title: "Tô no corre - pdR.",
+        link: "https://open.spotify.com/album/5BPRxL6oeEhXHrv0tYRamZ?si=1c64aee874df4d34",
       },
       {
         src: "/site_images/album_covers/2.webp",
         alt: "Lua dos Amantes - Última Dança",
         title: "Lua dos Amantes - Última Dança",
+        link: "https://open.spotify.com/album/4BOKcrGRzPgdU6hOFckp56?si=00ba71ecfae34b2e",
       },
       {
         src: "/site_images/album_covers/3.webp",
         alt: "Nothing New - Curtis Williams",
         title: "Nothing New - Curtis Williams",
+        link: "https://open.spotify.com/album/0uYVGhptbLWlTpt68pAvmQ?si=505e55fb507348fd",
       },
       {
         src: "/site_images/album_covers/4.webp",
         alt: "Last Action Hero - Curtis Williams",
         title: "Last Action Hero - Curtis Williams",
+        link: "https://open.spotify.com/album/4DVprHFZv6t6NhxQrelCAU?si=f0c44c78f31a486b",
       },
       {
         src: "/site_images/album_covers/5.webp",
@@ -212,31 +217,37 @@ export const sampleGalleries: Record<string, ImageGallery> = {
         src: "/site_images/album_covers/6.webp",
         alt: "Jovem Prince - Pedrones",
         title: "Jovem Prince - Pedrones",
+        link: "https://open.spotify.com/album/0hZMDPWac8zDER1WfbViMH?si=7a4fa8b3bbbd43f5",
       },
       {
         src: "/site_images/album_covers/7.webp",
         alt: "Mister Lonely - Curtis Williams",
         title: "Mister Lonely - Curtis Williams",
+        link: "https://open.spotify.com/album/6r0dpzjDSWUIAKgBRzWvmS?si=5b3c7f4b5e694848",
       },
       {
         src: "/site_images/album_covers/8.webp",
         alt: "America's Most Blunted - Curtis Williams",
         title: "America's Most Blunted - Curtis Williams",
+        link: "https://open.spotify.com/album/5V0LXaL7eHaDRBXYhHZSp9?si=4363dabef0b744ff",
       },
       {
         src: "/site_images/album_covers/9.webp",
         alt: "Sombra Lunar - KoninG",
         title: "Sombra Lunar - KoninG",
+        link: "https://open.spotify.com/album/3Bd8fhhn1f89XDBditd1AO?si=3e0fa32e214746ae",
       },
       {
         src: "/site_images/album_covers/10.webp",
         alt: "A Vida de Magabarai - Velez",
         title: "A Vida de Magabarai - Velez",
+        link: "https://open.spotify.com/album/56tmnmwwLRo2Fe151q2epe?si=ca12992705f7400c",
       },
       {
         src: "/site_images/album_covers/11.webp",
         alt: "Here With Me (feat. Mura Masa) - Curtis Williams",
         title: "Here With Me (feat. Mura Masa) - Curtis Williams",
+        link: "https://open.spotify.com/album/1TLZF7kfjS9YDsRkIAgKoL?si=864f8390d1d141a1",
       },
       {
         src: "/site_images/album_covers/12.webp",

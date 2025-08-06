@@ -121,6 +121,16 @@ export function ImageGalleryViewer({
             }),
           }}
         />
+
+        {/* Spotify button for images with Spotify links */}
+        {currentImage.link && currentImage.link.includes('spotify.com') && !imageLoading && (
+          <button
+            className="absolute bottom-2 left-2 right-2 bg-green-500 hover:bg-green-600 text-white text-sm py-2 px-4 font-['Pixelated MS Sans Serif'] border border-green-700 transition-colors duration-200"
+            onClick={() => window.open(currentImage.link, '_blank')}
+          >
+            View on Spotify
+          </button>
+        )}
       </div>
     </div>
   )
