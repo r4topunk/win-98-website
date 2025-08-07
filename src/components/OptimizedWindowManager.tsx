@@ -1,25 +1,22 @@
 import { memo } from "react"
-import { useAppSelector } from "../store/hooks"
-import { selectVisibleWindows } from "../store/selectors"
-import { OptimizedWindow } from "./OptimizedWindow"
-import { useWindowContext } from "../contexts/EnhancedWindowContext"
+import { useWindowContentCache } from "../contexts/WindowContentCacheContext"
+import { VirtualWindowManager } from "./VirtualWindowManager"
 
-// Memoized WindowManager to prevent unnecessary re-renders
 export const OptimizedWindowManager = memo(() => {
-  const visibleWindows = useAppSelector(selectVisibleWindows)
-  const { closeWindow } = useWindowContext()
+  const { getCacheStats } = useWindowContentCache()
+  
+  // Log cache performance in development (safely check for dev environment)
+  if (typeof window !== 'undefined' && window.location?.hostname === 'localhost') {
+    const stats = getCacheStats()
+    if (stats.hits + stats.misses > 0) {
+      console.log('Window Content Cache Stats:', {
+        ...stats,
+        hitRate: ((stats.hits / (stats.hits + stats.misses)) * 100).toFixed(1) + '%'
+      })
+    }
+  }
 
-  return (
-    <>
-      {visibleWindows.map((window) => (
-        <OptimizedWindow
-          key={window.id}
-          windowId={window.id}
-          onClose={() => closeWindow(window.id)}
-        />
-      ))}
-    </>
-  )
+  return <VirtualWindowManager />
 })
 
 OptimizedWindowManager.displayName = "OptimizedWindowManager"

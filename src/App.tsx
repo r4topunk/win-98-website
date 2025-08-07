@@ -3,6 +3,7 @@ import { Navbar } from "./components/navbar"
 import { Desktop } from "./components/desktop"
 // Enhanced Redux-based window management with backward compatibility
 import { WindowProvider } from "./contexts/EnhancedWindowContext"
+import { WindowContentCacheProvider } from "./contexts/WindowContentCacheContext"
 import { OptimizedWindowManager } from "./components/OptimizedWindowManager"
 import { IntroVideo } from "./components/IntroVideo"
 import { VintageTransition } from "./components/VintageTransition"
@@ -50,30 +51,32 @@ function App() {
 
   return (
     <WindowProvider>
-      {showIntro && <IntroVideo onComplete={handleIntroComplete} />}
-      {showTransition && (
-        <VintageTransition onComplete={handleTransitionComplete} />
-      )}
-      <CRTEffect>
-        <div className="bg-[url('/site_images/ui/background.webp')] bg-cover bg-no-repeat bg-center relative overflow-hidden flex flex-col h-[100dvh] md:h-[80vh] desktop-background">
-          <Desktop />
-          {/* Enhanced Redux-based WindowManager with backward compatibility */}
-          <OptimizedWindowManager />
-          <Navbar openStartMenu={() => setIsMenuOpen(!isMenuOpen)} />
-          {isMenuOpen && (
-            <div
-              ref={menuRef}
-              className="absolute bottom-8 left-0 z-50"
-            >
-              <img 
-                src="/site_images/ui/menu.webp" 
-                alt="Start Menu" 
-                className="w-full max-w-[200px] h-auto block shadow-lg"
-              />
-            </div>
-          )}
-        </div>
-      </CRTEffect>
+      <WindowContentCacheProvider>
+        {showIntro && <IntroVideo onComplete={handleIntroComplete} />}
+        {showTransition && (
+          <VintageTransition onComplete={handleTransitionComplete} />
+        )}
+        <CRTEffect>
+          <div className="bg-[url('/site_images/ui/background.webp')] bg-cover bg-no-repeat bg-center relative overflow-hidden flex flex-col h-[100dvh] md:h-[80vh] desktop-background">
+            <Desktop />
+            {/* Enhanced Redux-based WindowManager with advanced performance optimizations */}
+            <OptimizedWindowManager />
+            <Navbar openStartMenu={() => setIsMenuOpen(!isMenuOpen)} />
+            {isMenuOpen && (
+              <div
+                ref={menuRef}
+                className="absolute bottom-8 left-0 z-50"
+              >
+                <img 
+                  src="/site_images/ui/menu.webp" 
+                  alt="Start Menu" 
+                  className="w-full max-w-[200px] h-auto block shadow-lg"
+                />
+              </div>
+            )}
+          </div>
+        </CRTEffect>
+      </WindowContentCacheProvider>
     </WindowProvider>
   )
 }
