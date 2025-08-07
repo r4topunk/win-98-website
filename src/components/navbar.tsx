@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useWindowContext } from "../contexts/WindowContext";
+import { useWindowContext } from "../contexts/EnhancedWindowContext";
 
 interface NavbarProps {
   openStartMenu: () => void;

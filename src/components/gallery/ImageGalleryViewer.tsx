@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { ImageGallery } from "../../data/galleries"
 import { cn } from "../../utils/cn"
-import { useWindowContext } from "../../contexts/WindowContext"
+import { useWindowContext } from "../../contexts/EnhancedWindowContext"
 
 interface ImageGalleryViewerProps {
   gallery: ImageGallery

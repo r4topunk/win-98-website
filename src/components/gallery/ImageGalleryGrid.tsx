@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react"
 import { GalleryImage, ImageGallery } from "../../data/galleries"
-import { useWindowContext } from "../../contexts/WindowContext"
+import { useWindowContext } from "../../contexts/EnhancedWindowContext"
 import { cn } from "../../utils/cn"
 import { ImageGalleryViewer } from "./ImageGalleryViewer"
 

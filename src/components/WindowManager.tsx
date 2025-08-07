@@ -1,4 +1,4 @@
-import { useWindowContext } from "../contexts/WindowContext"
+import { useWindowContext } from "../contexts/EnhancedWindowContext"
 import { Window } from "./Window"
 
 export function WindowManager() {

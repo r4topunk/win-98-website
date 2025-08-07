@@ -6,7 +6,7 @@ import React, {
   useCallback,
   CSSProperties,
 } from "react"
-import { useWindowContext } from "../contexts/WindowContext"
+import { useWindowContext } from "../contexts/EnhancedWindowContext"
 import { cn } from "../utils/cn"
 
 interface WindowProps {

@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react"
 import { Navbar } from "./components/navbar"
 import { Desktop } from "./components/desktop"
-// Enhanced Redux-based window management with backward compatibility
+// Enhanced Redux-based window management
 import { WindowProvider } from "./contexts/EnhancedWindowContext"
 import { OptimizedWindowManager } from "./components/OptimizedWindowManager"
 import { IntroVideo } from "./components/IntroVideo"
@@ -57,7 +57,7 @@ function App() {
       <CRTEffect>
         <div className="bg-[url('/site_images/ui/background.webp')] bg-cover bg-no-repeat bg-center relative overflow-hidden flex flex-col h-[100dvh] md:h-[80vh] desktop-background">
           <Desktop />
-          {/* Enhanced Redux-based WindowManager with backward compatibility */}
+          {/* Using the enhanced Redux-based WindowManager */}
           <OptimizedWindowManager />
           <Navbar openStartMenu={() => setIsMenuOpen(!isMenuOpen)} />
           {isMenuOpen && (
