@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
 import { useWindowContext } from "../contexts/EnhancedWindowContext";
+import { useAppSelector } from "../store/hooks";
+import { selectAllWindows } from "../store/selectors";
+import { WindowEntity } from "../store/windowSlice";
 
 interface NavbarProps {
   openStartMenu: () => void;
@@ -7,7 +10,8 @@ interface NavbarProps {
 
 export function Navbar({ openStartMenu }: NavbarProps) {
   const [currentTime, setCurrentTime] = useState(new Date());
-  const { windows, restoreWindow, focusWindow } = useWindowContext();
+  const { restoreWindow, focusWindow } = useWindowContext();
+  const windows = useAppSelector(selectAllWindows);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -20,7 +24,6 @@ export function Navbar({ openStartMenu }: NavbarProps) {
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
-
 
   const handleWindowClick = (windowId: string, isMinimized: boolean) => {
     if (isMinimized) {
@@ -43,7 +46,7 @@ export function Navbar({ openStartMenu }: NavbarProps) {
           </button>
           
           {/* Taskbar buttons for all open windows */}
-          {windows.filter(w => w.isOpen).map((window) => (
+          {windows.filter((w: WindowEntity) => w.isOpen).map((window: WindowEntity) => (
             <button
               key={window.id}
               className={`px-2 py-1 text-xs truncate max-w-32 ${
