@@ -176,7 +176,7 @@ franciscoskt/
   - Album Covers (10 covers) → `/site_images/album_covers/`
   - Colabs (collaborations)
   - Desenhe (20 custom designs) → `/site_images/customs/`
-  - W.I.P. (work in progress)
+  - Shinkansen (Instagram link)
 - **UX Focus**: Intuitive content discovery with clear visual hierarchy and comprehensive portfolio access
 
 **DesktopIcon.tsx**

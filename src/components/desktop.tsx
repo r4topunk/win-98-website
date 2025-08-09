@@ -32,9 +32,12 @@ export function Desktop() {
           icon_name="Customs"
         />
         <DesktopIcon icon_path="/icons/imaggif-1.png" icon_name="Desenhe" />
-        <DesktopIcon icon_path="/icons/directory_movie-4.png" icon_name="W.I.P." />
+        <DesktopIcon
+          icon_path="/icons/directory_movie-4.png"
+          icon_name="Shinkansen"
+        />
       </div>
-      
+
       {/* Error icon positioned absolutely in bottom right corner */}
       <div className="absolute bottom-1 right-1">
         <DesktopIcon icon_path="/icons/msg_error-0.png" icon_name="Error" />

@@ -16,8 +16,8 @@ export function DesktopIcon({ icon_path, icon_name }: DesktopIconProps) {
       return
     }
 
-    // Special case for W.I.P. - open Instagram URL in new tab
-    if (icon_name === "W.I.P.") {
+  // Special case for Shinkansen - open Instagram URL in new tab
+  if (icon_name === "Shinkansen") {
       window.open("https://www.instagram.com/shinkansen.films/", "_blank")
       return
     }
