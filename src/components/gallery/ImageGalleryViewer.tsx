@@ -131,6 +131,16 @@ export function ImageGalleryViewer({
             View on Spotify
           </button>
         )}
+
+        {/* YouTube button for images with YouTube links */}
+        {currentImage.link && (currentImage.link.includes('youtube.com') || currentImage.link.includes('youtu.be')) && !imageLoading && (
+          <button
+            className="absolute bottom-2 left-2 right-2 bg-red-600 hover:bg-red-700 text-white text-sm py-2 px-4 font-['Pixelated MS Sans Serif'] border border-red-800 transition-colors duration-200"
+            onClick={() => window.open(currentImage.link as string, '_blank')}
+          >
+            Watch on YouTube
+          </button>
+        )}
       </div>
     </div>
   )
