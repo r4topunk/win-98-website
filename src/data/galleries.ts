@@ -376,6 +376,126 @@ export const sampleGalleries: Record<string, ImageGallery> = {
         alt: "Custom Design 20",
         title: "Custom 20",
       },
+      {
+        src: "/site_images/customs/21.webp",
+        alt: "Custom Design 21",
+        title: "Custom 21",
+      },
+      {
+        src: "/site_images/customs/22.webp",
+        alt: "Custom Design 22",
+        title: "Custom 22",
+      },
+      {
+        src: "/site_images/customs/23.webp",
+        alt: "Custom Design 23",
+        title: "Custom 23",
+      },
+      {
+        src: "/site_images/customs/24.webp",
+        alt: "Custom Design 24",
+        title: "Custom 24",
+      },
+      {
+        src: "/site_images/customs/25.webp",
+        alt: "Custom Design 25",
+        title: "Custom 25",
+      },
+      {
+        src: "/site_images/customs/26.webp",
+        alt: "Custom Design 26",
+        title: "Custom 26",
+      },
+      {
+        src: "/site_images/customs/27.webp",
+        alt: "Custom Design 27",
+        title: "Custom 27",
+      },
+      {
+        src: "/site_images/customs/28.webp",
+        alt: "Custom Design 28",
+        title: "Custom 28",
+      },
+      {
+        src: "/site_images/customs/29.webp",
+        alt: "Custom Design 29",
+        title: "Custom 29",
+      },
+      {
+        src: "/site_images/customs/30.webp",
+        alt: "Custom Design 30",
+        title: "Custom 30",
+      },
+      {
+        src: "/site_images/customs/31.webp",
+        alt: "Custom Design 31",
+        title: "Custom 31",
+      },
+      {
+        src: "/site_images/customs/32.webp",
+        alt: "Custom Design 32",
+        title: "Custom 32",
+      },
+      {
+        src: "/site_images/customs/33.webp",
+        alt: "Custom Design 33",
+        title: "Custom 33",
+      },
+      {
+        src: "/site_images/customs/34.webp",
+        alt: "Custom Design 34",
+        title: "Custom 34",
+      },
+      {
+        src: "/site_images/customs/35.webp",
+        alt: "Custom Design 35",
+        title: "Custom 35",
+      },
+      {
+        src: "/site_images/customs/36.webp",
+        alt: "Custom Design 36",
+        title: "Custom 36",
+      },
+      {
+        src: "/site_images/customs/37.webp",
+        alt: "Custom Design 37",
+        title: "Custom 37",
+      },
+      {
+        src: "/site_images/customs/38.webp",
+        alt: "Custom Design 38",
+        title: "Custom 38",
+      },
+      {
+        src: "/site_images/customs/39.webp",
+        alt: "Custom Design 39",
+        title: "Custom 39",
+      },
+      {
+        src: "/site_images/customs/40.webp",
+        alt: "Custom Design 40",
+        title: "Custom 40",
+      },
+      {
+        src: "/site_images/customs/41.webp",
+        alt: "Custom Design 41",
+        title: "Custom 41",
+      },
+      {
+        src: "/site_images/customs/42.webp",
+        alt: "Custom Design 42",
+        title: "Custom 42",
+      },
+      {
+        src: "/site_images/customs/43.webp",
+        alt: "Custom Design 43",
+        title: "Custom 43",
+      },
+      {
+        src: "/site_images/customs/44.webp",
+        alt: "Custom Design 44",
+        title: "Custom 44",
+      },
     ],
   },
   peloMundo: {
@@ -446,6 +566,66 @@ export const sampleGalleries: Record<string, ImageGallery> = {
         src: "/site_images/pelo_mundo/13.webp",
         alt: "Travel Photo 13",
         title: "Pelo Mundo 13",
+      },
+      {
+        src: "/site_images/pelo_mundo/14.webp",
+        alt: "Travel Photo 14",
+        title: "Pelo Mundo 14",
+      },
+      {
+        src: "/site_images/pelo_mundo/15.webp",
+        alt: "Travel Photo 15",
+        title: "Pelo Mundo 15",
+      },
+      {
+        src: "/site_images/pelo_mundo/16.webp",
+        alt: "Travel Photo 16",
+        title: "Pelo Mundo 16",
+      },
+      {
+        src: "/site_images/pelo_mundo/17.webp",
+        alt: "Travel Photo 17",
+        title: "Pelo Mundo 17",
+      },
+      {
+        src: "/site_images/pelo_mundo/18.webp",
+        alt: "Travel Photo 18",
+        title: "Pelo Mundo 18",
+      },
+      {
+        src: "/site_images/pelo_mundo/19.webp",
+        alt: "Travel Photo 19",
+        title: "Pelo Mundo 19",
+      },
+      {
+        src: "/site_images/pelo_mundo/20.webp",
+        alt: "Travel Photo 20",
+        title: "Pelo Mundo 20",
+      },
+      {
+        src: "/site_images/pelo_mundo/21.webp",
+        alt: "Travel Photo 21",
+        title: "Pelo Mundo 21",
+      },
+      {
+        src: "/site_images/pelo_mundo/22.webp",
+        alt: "Travel Photo 22",
+        title: "Pelo Mundo 22",
+      },
+      {
+        src: "/site_images/pelo_mundo/23.webp",
+        alt: "Travel Photo 23",
+        title: "Pelo Mundo 23",
+      },
+      {
+        src: "/site_images/pelo_mundo/24.webp",
+        alt: "Travel Photo 24",
+        title: "Pelo Mundo 24",
+      },
+      {
+        src: "/site_images/pelo_mundo/25.webp",
+        alt: "Travel Photo 25",
+        title: "Pelo Mundo 25",
       },
     ],
   },
