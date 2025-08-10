@@ -2,6 +2,7 @@ import { useState } from "react"
 import { ImageGalleryGrid } from "./gallery/ImageGalleryGrid"
 import { ImageGalleryViewer } from "./gallery/ImageGalleryViewer"
 import { sampleGalleries } from "../data/galleries"
+import { RandomYouTubePlayer } from "./content/RandomYouTubePlayer"
 
 interface WindowContentsProps {
   iconType: string
@@ -107,14 +108,8 @@ export function WindowContents({ iconType }: WindowContentsProps) {
 
     case "Computer":
       return (
-        <div className="p-2">
-          <div className="field-row">
-            <ul className="tree-view">
-              <li>Local Disk (C:)</li>
-              <li>CD Drive (D:)</li>
-              <li>Network (Z:)</li>
-            </ul>
-          </div>
+        <div className="w-full h-full">
+          <RandomYouTubePlayer />
         </div>
       )
 

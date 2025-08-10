@@ -23,7 +23,7 @@ export function DesktopIcon({ icon_path, icon_name }: DesktopIconProps) {
     }
 
     // Determine appropriate window size for gallery content
-    const isGallery = ["Movies", "Images", "Album Covers"].includes(icon_name)
+  const isGallery = ["Movies", "Images", "Album Covers"].includes(icon_name)
     const isPaint = icon_name === "Desenhe"
     const isPix = icon_name === "???"
     const isError = icon_name === "Error"
@@ -127,12 +127,22 @@ export function DesktopIcon({ icon_path, icon_name }: DesktopIconProps) {
           }
         : { width: 740, height: 540 } // Same size as Computer window
     } else {
-      windowSize = isMobile
-        ? {
-            width: Math.min(280, window.innerWidth - 30),
-            height: Math.min(300, window.innerHeight - 140),
-          }
-        : { width: 740, height: 540 } // Updated to new default size
+      // Default windows (including Computer). Make Computer 16:9
+      if (icon_name === "Computer") {
+        // Choose width based on device and derive height from 16:9
+        const baseWidth = isMobile
+          ? Math.min(360, window.innerWidth - 20)
+          : 800
+        const baseHeight = Math.round((baseWidth * 9) / 16)
+        windowSize = { width: baseWidth, height: baseHeight }
+      } else {
+        windowSize = isMobile
+          ? {
+              width: Math.min(280, window.innerWidth - 30),
+              height: Math.min(300, window.innerHeight - 140),
+            }
+          : { width: 740, height: 540 }
+      }
     }
 
     openWindow({
