@@ -16,9 +16,18 @@ export function ImageGalleryViewer({
   className,
   windowId,
 }: ImageGalleryViewerProps) {
-  const { windows } = useWindowContext()
+  const { windows, openWindow } = useWindowContext()
   const [currentIndex, setCurrentIndex] = useState(currentImageIndex)
   const [imageLoading, setImageLoading] = useState(true)
+  const [isMobile, setIsMobile] = useState(false)
+
+  // Check if mobile
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   // Find the current window to check if it's fullscreen
   const currentWindow = windowId ? windows.find(w => w.id === windowId) : null
@@ -72,6 +81,68 @@ export function ImageGalleryViewer({
 
   const handleImageLoad = () => {
     setImageLoading(false)
+  }
+
+  // Extract YouTube ID from URL
+  const extractYouTubeId = (url: string): string | null => {
+    try {
+      const u = new URL(url)
+      if (u.hostname.includes("youtu.be")) {
+        return u.pathname.replace("/", "").split("/")[0] || null
+      }
+      if (u.searchParams.get("v")) {
+        return u.searchParams.get("v")
+      }
+      if (u.pathname.startsWith("/shorts/")) {
+        const parts = u.pathname.split("/")
+        return parts[2] || null
+      }
+      if (u.pathname.startsWith("/embed/")) {
+        const parts = u.pathname.split("/")
+        return parts[2] || null
+      }
+      return null
+    } catch {
+      return null
+    }
+  }
+
+  // Handle YouTube link click
+  const handleYouTubeClick = () => {
+    if (!currentImage.link) return
+
+    const youtubeId = extractYouTubeId(currentImage.link)
+    if (youtubeId) {
+      const embedUrl = `https://www.youtube.com/embed/${youtubeId}?rel=0&modestbranding=1`
+      
+      // Open YouTube video window with 16:9 aspect ratio (responsive)
+      const videoWidth = isMobile 
+        ? Math.min(360, window.innerWidth - 20)
+        : 800
+      const videoHeight = Math.round((videoWidth * 9) / 16)
+      
+      openWindow({
+        id: `youtube-${youtubeId}-${Date.now()}`,
+        title: `YouTube - ${currentImage.title || 'Video'}`,
+        content: (
+          <div className="w-full h-full">
+            <iframe
+              title={currentImage.title || 'YouTube Video'}
+              src={embedUrl}
+              className="w-full h-full border-0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            />
+          </div>
+        ),
+        size: { width: videoWidth, height: videoHeight },
+      })
+
+      // Keep current image window open - no need to duplicate as it's already open
+    } else {
+      // Fallback: open original YouTube link
+      window.open(currentImage.link, '_blank')
+    }
   }
 
   if (!currentImage) {
@@ -136,9 +207,9 @@ export function ImageGalleryViewer({
         {currentImage.link && (currentImage.link.includes('youtube.com') || currentImage.link.includes('youtu.be')) && !imageLoading && (
           <button
             className="absolute bottom-2 left-2 right-2 bg-red-600 hover:bg-red-700 text-white text-sm py-2 px-4 font-['Pixelated MS Sans Serif'] border border-red-800 transition-colors duration-200"
-            onClick={() => window.open(currentImage.link as string, '_blank')}
+            onClick={handleYouTubeClick}
           >
-            Watch on YouTube
+Watch video
           </button>
         )}
       </div>

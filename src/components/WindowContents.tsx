@@ -2,7 +2,7 @@ import { useState } from "react"
 import { ImageGalleryGrid } from "./gallery/ImageGalleryGrid"
 import { ImageGalleryViewer } from "./gallery/ImageGalleryViewer"
 import { sampleGalleries } from "../data/galleries"
-import { RandomYouTubePlayer } from "./content/RandomYouTubePlayer"
+import { TextNoteViewer } from "./content/TextNoteViewer"
 
 interface WindowContentsProps {
   iconType: string
@@ -109,7 +109,7 @@ export function WindowContents({ iconType }: WindowContentsProps) {
     case "Computer":
       return (
         <div className="w-full h-full">
-          <RandomYouTubePlayer />
+          <TextNoteViewer />
         </div>
       )
 

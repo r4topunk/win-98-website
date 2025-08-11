@@ -133,7 +133,9 @@ export function DesktopIcon({ icon_path, icon_name }: DesktopIconProps) {
         const baseWidth = isMobile
           ? Math.min(360, window.innerWidth - 20)
           : 800
-        const baseHeight = Math.round((baseWidth * 9) / 16)
+        const baseHeight = isMobile
+          ? Math.min(500, window.innerHeight - 100) // Increased height for mobile text reading
+          : Math.round((baseWidth * 9) / 16)
         windowSize = { width: baseWidth, height: baseHeight }
       } else {
         windowSize = isMobile
