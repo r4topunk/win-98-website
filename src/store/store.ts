@@ -8,9 +8,23 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        // Ignore ReactNode content in state
-        ignoredActions: ['windows/openWindow'],
-        ignoredPaths: ['windows.entities.*.content']
+        // Ignore ReactNode content in state for all window-related actions
+        ignoredActions: [
+          'windows/openWindow',
+          'windows/closeWindow',
+          'windows/minimizeWindow',
+          'windows/restoreWindow',
+          'windows/maximizeWindow',
+          'windows/focusWindow',
+          'windows/updateWindowPosition',
+          'windows/updateWindowSize',
+          'windows/startDrag',
+          'windows/endDrag',
+          'windows/startResize',
+          'windows/endResize',
+          'windows/updateScreenDimensions'
+        ],
+        ignoredPaths: ['windows.entities']
       }
     })
 })
