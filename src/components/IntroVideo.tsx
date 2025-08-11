@@ -5,13 +5,12 @@ interface IntroVideoProps {
 }
 
 export const IntroVideo = ({ onComplete }: IntroVideoProps) => {
-  const [showVideo, setShowVideo] = useState(false);
+  const [showVideo, setShowVideo] = useState(true);
   const [error, setError] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const now = new Date().getTime();
-    setShowVideo(true);
     localStorage.setItem('introLastShown', now.toString());
   }, []);
 
@@ -19,18 +18,31 @@ export const IntroVideo = ({ onComplete }: IntroVideoProps) => {
     const video = videoRef.current;
     if (!video) return;
 
-    const handleCanPlay = () => {
-      // Set playback rate to 2x for both mobile and desktop
+    const setPlaybackRate = () => {
       video.playbackRate = 2.0;
-      
+    };
+
+    const handleCanPlay = () => {
+      setPlaybackRate();
       // Ensure autoplay works on mobile by attempting play immediately
-      video.play().catch((err) => {
-        console.error('Error playing video:', err);
+      video.play().then(() => {
+        setPlaybackRate();
+      }).catch((err) => {
         // On mobile, sometimes we need to retry play after a brief delay
         setTimeout(() => {
-          video.play().catch(() => setError(true));
+          video.play().then(() => {
+            setPlaybackRate();
+          }).catch(() => setError(true));
         }, 100);
       });
+    };
+
+    const handlePlay = () => {
+      setPlaybackRate();
+    };
+
+    const handleLoadedData = () => {
+      setPlaybackRate();
     };
 
     const handleError = () => {
@@ -38,6 +50,8 @@ export const IntroVideo = ({ onComplete }: IntroVideoProps) => {
     };
 
     video.addEventListener('canplay', handleCanPlay);
+    video.addEventListener('play', handlePlay);
+    video.addEventListener('loadeddata', handleLoadedData);
     video.addEventListener('error', handleError);
 
     // Add flickering effect
@@ -48,6 +62,8 @@ export const IntroVideo = ({ onComplete }: IntroVideoProps) => {
 
     return () => {
       video.removeEventListener('canplay', handleCanPlay);
+      video.removeEventListener('play', handlePlay);
+      video.removeEventListener('loadeddata', handleLoadedData);
       video.removeEventListener('error', handleError);
       clearInterval(flickerInterval);
     };
