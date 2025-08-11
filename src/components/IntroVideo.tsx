@@ -5,7 +5,6 @@ interface IntroVideoProps {
 }
 
 export const IntroVideo = ({ onComplete }: IntroVideoProps) => {
-  const [showVideo, setShowVideo] = useState(true);
   const [error, setError] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -27,7 +26,7 @@ export const IntroVideo = ({ onComplete }: IntroVideoProps) => {
       // Ensure autoplay works on mobile by attempting play immediately
       video.play().then(() => {
         setPlaybackRate();
-      }).catch((err) => {
+      }).catch(() => {
         // On mobile, sometimes we need to retry play after a brief delay
         setTimeout(() => {
           video.play().then(() => {
@@ -69,7 +68,6 @@ export const IntroVideo = ({ onComplete }: IntroVideoProps) => {
     };
   }, []);
 
-  if (!showVideo) return null;
 
   return (
     <div className="fixed inset-0 z-50 bg-black flex items-center justify-center">
