@@ -20,7 +20,7 @@ In addition to hundreds of canvases and tattoos spread throughout Brazil, he has
 
 Always seeking to blend all of this in his films, bringing diverse artistic experiences with skateboarding and other everyday things, no one knows what the next step will be because he is always in motion.`,
 
-    jp: `Francisco H.またはfranciscosktは、サンパウロの首都で生まれ、そこで芸術を発展させたアーティストです。8歳で絵を描き始め、それ以来止まることはありませんでした。
+    jp: `フランシスコまたはフランシスコスクットは、サンパウロの首都で生まれ、そこで芸術を発展させたアーティストです。8歳で絵を描き始め、それ以来止まることはありませんでした。
 
 独学で、スケートボードなど数多くの活動を常に探求しており、現在は自分で制作した映画をいくつか持っています。軌跡の初期から強いアイデンティティを明らかにした作品の友人や賞賛者のおかげで、サンパウロ（グループ）、バルセロナ（ソロ）で開催された展示会を履歴書に誇らしく持っています。また、国内外のアーティストのためのアルバムカバーやシングルも数多く手がけ、常にアーティストのサインと自分のサインを融合させています。
 
