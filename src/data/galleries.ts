@@ -194,6 +194,36 @@ export const sampleGalleries: Record<string, ImageGallery> = {
         alt: "Photography 21",
         title: "Image 21",
       },
+      {
+        src: "/site_images/images/22.webp",
+        alt: "Photography 22",
+        title: "Image 22",
+      },
+      {
+        src: "/site_images/images/23.webp",
+        alt: "Photography 23",
+        title: "Image 23",
+      },
+      {
+        src: "/site_images/images/24.webp",
+        alt: "Photography 24",
+        title: "Image 24",
+      },
+      {
+        src: "/site_images/images/25.webp",
+        alt: "Photography 25",
+        title: "Image 25",
+      },
+      {
+        src: "/site_images/images/26.webp",
+        alt: "Photography 26",
+        title: "Image 26",
+      },
+      {
+        src: "/site_images/images/27.webp",
+        alt: "Photography 27",
+        title: "Image 27",
+      },
     ],
   },
   albumCovers: {
@@ -626,6 +656,66 @@ export const sampleGalleries: Record<string, ImageGallery> = {
         src: "/site_images/pelo_mundo/25.webp",
         alt: "Travel Photo 25",
         title: "Pelo Mundo 25",
+      },
+      {
+        src: "/site_images/pelo_mundo/26.webp",
+        alt: "Travel Photo 26",
+        title: "Pelo Mundo 26",
+      },
+      {
+        src: "/site_images/pelo_mundo/27.webp",
+        alt: "Travel Photo 27",
+        title: "Pelo Mundo 27",
+      },
+      {
+        src: "/site_images/pelo_mundo/28.webp",
+        alt: "Travel Photo 28",
+        title: "Pelo Mundo 28",
+      },
+      {
+        src: "/site_images/pelo_mundo/29.webp",
+        alt: "Travel Photo 29",
+        title: "Pelo Mundo 29",
+      },
+      {
+        src: "/site_images/pelo_mundo/30.webp",
+        alt: "Travel Photo 30",
+        title: "Pelo Mundo 30",
+      },
+      {
+        src: "/site_images/pelo_mundo/31.webp",
+        alt: "Travel Photo 31",
+        title: "Pelo Mundo 31",
+      },
+      {
+        src: "/site_images/pelo_mundo/32.webp",
+        alt: "Travel Photo 32",
+        title: "Pelo Mundo 32",
+      },
+      {
+        src: "/site_images/pelo_mundo/33.webp",
+        alt: "Travel Photo 33",
+        title: "Pelo Mundo 33",
+      },
+      {
+        src: "/site_images/pelo_mundo/34.webp",
+        alt: "Travel Photo 34",
+        title: "Pelo Mundo 34",
+      },
+      {
+        src: "/site_images/pelo_mundo/35.webp",
+        alt: "Travel Photo 35",
+        title: "Pelo Mundo 35",
+      },
+      {
+        src: "/site_images/pelo_mundo/36.webp",
+        alt: "Travel Photo 36",
+        title: "Pelo Mundo 36",
+      },
+      {
+        src: "/site_images/pelo_mundo/37.webp",
+        alt: "Travel Photo 37",
+        title: "Pelo Mundo 37",
       },
     ],
   },
