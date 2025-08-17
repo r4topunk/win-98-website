@@ -105,10 +105,25 @@ export const VirtualImageGrid = memo(({ gallery, className }: VirtualImageGridPr
 
   const handleImageClick = useMemo(() => 
     (image: GalleryImage, index: number) => {
-      // Use mobile-optimized sizing for image viewer windows
-      const windowSize = isMobile
-        ? { width: Math.min(320, window.innerWidth - 20), height: 300 }
-        : { width: 400, height: 200 }
+      // Use sensible fixed sizes for different screen categories
+      const viewportWidth = window.innerWidth
+      
+      let windowWidth: number
+      let windowHeight: number
+      
+      if (isMobile || viewportWidth < 768) {
+        // Mobile/small screens: compact size
+        windowWidth = 300
+        windowHeight = 250
+      } else if (viewportWidth < 1400) {
+        // Medium screens (like 1352x878): smaller size
+        windowWidth = 320
+        windowHeight = 240
+      } else {
+        // Large screens: even smaller
+        windowWidth = 360
+        windowHeight = 280
+      }
 
       const windowId = `${gallery.id}-viewer-${index}`
 
@@ -123,7 +138,7 @@ export const VirtualImageGrid = memo(({ gallery, className }: VirtualImageGridPr
           />
         ),
         noScroll: true, // Disable scroll to let image display at natural height
-        size: windowSize,
+        size: { width: windowWidth, height: windowHeight },
       })
     }, [gallery, isMobile, openWindow]
   )

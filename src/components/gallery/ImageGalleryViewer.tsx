@@ -115,11 +115,25 @@ export function ImageGalleryViewer({
     if (youtubeId) {
       const embedUrl = `https://www.youtube.com/embed/${youtubeId}?rel=0&modestbranding=1`
       
-      // Open YouTube video window with 16:9 aspect ratio (responsive)
-      const videoWidth = isMobile 
-        ? Math.min(360, window.innerWidth - 20)
-        : 800
-      const videoHeight = Math.round((videoWidth * 9) / 16)
+      // Use sensible fixed sizes for video windows
+      const viewportWidth = window.innerWidth
+      
+      let videoWidth: number
+      let videoHeight: number
+      
+      if (isMobile || viewportWidth < 768) {
+        // Mobile: compact video size
+        videoWidth = 320
+        videoHeight = 180 // 16:9 aspect ratio
+      } else if (viewportWidth < 1400) {
+        // Medium screens: smaller size for 1352x878 etc
+        videoWidth = 480
+        videoHeight = 270 // 16:9 aspect ratio
+      } else {
+        // Large screens: smaller video size than before
+        videoWidth = 600
+        videoHeight = 337 // 16:9 aspect ratio
+      }
       
       openWindow({
         id: `youtube-${youtubeId}-${Date.now()}`,

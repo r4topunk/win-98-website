@@ -23,7 +23,7 @@ export function DesktopIcon({ icon_path, icon_name }: DesktopIconProps) {
     }
 
     // Determine appropriate window size for gallery content
-  const isGallery = ["Movies", "Images", "Album Covers"].includes(icon_name)
+  const isGallery = ["Movies", "Images", "Album Covers", "Customs", "Pelo mundo", "Rejects"].includes(icon_name)
     const isPaint = icon_name === "Desenhe"
     const isPix = icon_name === "???"
     const isError = icon_name === "Error"
@@ -59,7 +59,11 @@ export function DesktopIcon({ icon_path, icon_name }: DesktopIconProps) {
     } else if (isPix) {
       // For pix, calculate window size using the known image dimensions: 3028 × 4961
       const imageAspectRatio = 3028 / 4961 // ≈ 0.610
-      const pixWidth = isMobile ? Math.min(350, window.innerWidth - 20) : 350
+      const pixWidth = isMobile 
+        ? Math.min(350, window.innerWidth - 20) 
+        : window.innerWidth < 1400
+        ? 280 // Smaller for medium screens
+        : 350
       
       // Calculate height from width using the aspect ratio, then add space for window chrome
       const imageHeight = pixWidth / imageAspectRatio
@@ -125,13 +129,17 @@ export function DesktopIcon({ icon_path, icon_name }: DesktopIconProps) {
             width: Math.min(320, window.innerWidth - 20),
             height: Math.min(400, window.innerHeight - 140),
           }
-        : { width: 740, height: 540 } // Same size as Computer window
+        : window.innerWidth < 1400
+        ? { width: 500, height: 400 } // Smaller size for medium screens
+        : { width: 740, height: 540 } // Same size as Computer window for large screens
     } else {
       // Default windows (including Computer). Make Computer 16:9
       if (icon_name === "Computer") {
         // Choose width based on device and derive height from 16:9
         const baseWidth = isMobile
           ? Math.min(360, window.innerWidth - 20)
+          : window.innerWidth < 1400
+          ? 600 // Smaller for medium screens
           : 800
         const baseHeight = isMobile
           ? Math.min(500, window.innerHeight - 100) // Increased height for mobile text reading
