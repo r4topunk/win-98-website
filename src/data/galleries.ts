@@ -753,6 +753,81 @@ export const sampleGalleries: Record<string, ImageGallery> = {
         alt: "Reject 6",
         title: "Reject 6",
       },
+      {
+        src: "/site_images/rejects/7.webp",
+        alt: "Reject 7",
+        title: "Reject 7",
+      },
+      {
+        src: "/site_images/rejects/8.webp",
+        alt: "Reject 8",
+        title: "Reject 8",
+      },
+      {
+        src: "/site_images/rejects/9.webp",
+        alt: "Reject 9",
+        title: "Reject 9",
+      },
+      {
+        src: "/site_images/rejects/10.webp",
+        alt: "Reject 10",
+        title: "Reject 10",
+      },
+      {
+        src: "/site_images/rejects/11.webp",
+        alt: "Reject 11",
+        title: "Reject 11",
+      },
+      {
+        src: "/site_images/rejects/12.webp",
+        alt: "Reject 12",
+        title: "Reject 12",
+      },
+      {
+        src: "/site_images/rejects/13.webp",
+        alt: "Reject 13",
+        title: "Reject 13",
+      },
+      {
+        src: "/site_images/rejects/14.webp",
+        alt: "Reject 14",
+        title: "Reject 14",
+      },
+      {
+        src: "/site_images/rejects/15.webp",
+        alt: "Reject 15",
+        title: "Reject 15",
+      },
+      {
+        src: "/site_images/rejects/16.webp",
+        alt: "Reject 16",
+        title: "Reject 16",
+      },
+      {
+        src: "/site_images/rejects/17.webp",
+        alt: "Reject 17",
+        title: "Reject 17",
+      },
+      {
+        src: "/site_images/rejects/18.webp",
+        alt: "Reject 18",
+        title: "Reject 18",
+      },
+      {
+        src: "/site_images/rejects/19.webp",
+        alt: "Reject 19",
+        title: "Reject 19",
+      },
+      {
+        src: "/site_images/rejects/20.webp",
+        alt: "Reject 20",
+        title: "Reject 20",
+      },
+      {
+        src: "/site_images/rejects/21.webp",
+        alt: "Reject 21",
+        title: "Reject 21",
+      },
     ],
   },
   paint: {
