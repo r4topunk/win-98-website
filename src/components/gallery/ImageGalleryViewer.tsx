@@ -125,7 +125,7 @@ export function ImageGalleryViewer({
         // Mobile: compact video size
         videoWidth = 320
         videoHeight = 180 // 16:9 aspect ratio
-      } else if (viewportWidth < 1100) {
+      } else if (viewportWidth < 1150) {
         // Small desktop: compact video size
         videoWidth = 300
         videoHeight = 169 // 16:9 aspect ratio

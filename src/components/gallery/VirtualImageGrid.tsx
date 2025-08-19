@@ -116,10 +116,10 @@ export const VirtualImageGrid = memo(({ gallery, className }: VirtualImageGridPr
         // Mobile screens: compact size
         windowWidth = 300
         windowHeight = 250
-      } else if (viewportWidth < 1100) {
-        // Small desktop screens: compact size
-        windowWidth = 240
-        windowHeight = 190
+      } else if (viewportWidth < 1150) {
+        // Small desktop screens: smaller size
+        windowWidth = 200
+        windowHeight = 160
       } else if (viewportWidth < 1400) {
         // Medium desktop screens: medium size
         windowWidth = 320

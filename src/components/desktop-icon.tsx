@@ -8,6 +8,10 @@ interface DesktopIconProps {
 
 export function DesktopIcon({ icon_path, icon_name }: DesktopIconProps) {
   const { openWindow } = useWindowContext()
+  
+  // Check screen size for icon sizing
+  const screenWidth = typeof window !== 'undefined' ? window.innerWidth : 1200
+  const iconSize = screenWidth < 1150 ? 18 : 32
 
   const handleIconClick = () => {
     // Special case for Lojinha - open URL in new tab
@@ -32,8 +36,8 @@ export function DesktopIcon({ icon_path, icon_name }: DesktopIconProps) {
     // Check screen size category
     const screenWidth = window.innerWidth
     const isMobile = screenWidth < 768
-    const isSmallDesktop = screenWidth >= 768 && screenWidth < 1100
-    const isMediumDesktop = screenWidth >= 1100 && screenWidth < 1400
+    const isSmallDesktop = screenWidth >= 768 && screenWidth < 1150
+    const isMediumDesktop = screenWidth >= 1150 && screenWidth < 1400
 
     let windowSize
     if (isPaint) {
@@ -200,7 +204,7 @@ export function DesktopIcon({ icon_path, icon_name }: DesktopIconProps) {
       <img
         src={icon_path}
         alt={icon_name}
-        width={32}
+        width={iconSize}
         className="pointer-events-none"
       />
       <p className="font-['Pixelated MS Sans Serif'] text-white font-light!">

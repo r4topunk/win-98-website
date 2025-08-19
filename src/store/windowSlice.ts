@@ -73,8 +73,8 @@ const initialState: WindowState = {
     height: typeof window !== 'undefined' ? window.innerHeight : 0
   },
   isMobile: typeof window !== 'undefined' ? window.innerWidth < 768 : false,
-  isSmallDesktop: typeof window !== 'undefined' ? window.innerWidth >= 768 && window.innerWidth < 1100 : false,
-  isMediumDesktop: typeof window !== 'undefined' ? window.innerWidth >= 1100 && window.innerWidth < 1400 : false,
+  isSmallDesktop: typeof window !== 'undefined' ? window.innerWidth >= 768 && window.innerWidth < 1150 : false,
+  isMediumDesktop: typeof window !== 'undefined' ? window.innerWidth >= 1150 && window.innerWidth < 1400 : false,
   maxZIndex: 10
 }
 
@@ -374,8 +374,8 @@ const windowSlice = createSlice({
       state.screenDimensions = action.payload
       const width = action.payload.width
       state.isMobile = width < 768
-      state.isSmallDesktop = width >= 768 && width < 1100
-      state.isMediumDesktop = width >= 1100 && width < 1400
+      state.isSmallDesktop = width >= 768 && width < 1150
+      state.isMediumDesktop = width >= 1150 && width < 1400
     }
   }
 })
