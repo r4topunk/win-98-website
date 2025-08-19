@@ -226,6 +226,16 @@ export function ImageGalleryViewer({
 Watch video
           </button>
         )}
+
+        {/* Pix button - only shows in pix viewer */}
+        {windowId === 'pix-viewer' && !imageLoading && (
+          <button
+            className="absolute top-2 left-2 right-2 bg-blue-600 hover:bg-blue-700 text-white text-sm py-2 px-4 font-['Pixelated MS Sans Serif'] border border-blue-800 transition-colors duration-200"
+            onClick={() => {}}
+          >
+            me paga um almoço aí jjjkkkkk
+          </button>
+        )}
       </div>
     </div>
   )
