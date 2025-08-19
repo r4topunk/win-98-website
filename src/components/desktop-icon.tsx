@@ -29,14 +29,23 @@ export function DesktopIcon({ icon_path, icon_name }: DesktopIconProps) {
     const isError = icon_name === "Error"
     const isContact = icon_name === "Contato"
 
-    // Check if mobile (basic check since we don't have access to WindowContext state here)
-    const isMobile = window.innerWidth < 768
+    // Check screen size category
+    const screenWidth = window.innerWidth
+    const isMobile = screenWidth < 768
+    const isSmallDesktop = screenWidth >= 768 && screenWidth < 1100
+    const isMediumDesktop = screenWidth >= 1100 && screenWidth < 1400
 
     let windowSize
     if (isPaint) {
       // For paint, calculate window size using the known image dimensions: 1654 × 1486
       const imageAspectRatio = 1654 / 1486 // ≈ 1.113
-      const paintWidth = isMobile ? Math.min(350, window.innerWidth - 20) : 500
+      const paintWidth = isMobile 
+        ? Math.min(350, screenWidth - 20)
+        : isSmallDesktop
+        ? 280
+        : isMediumDesktop
+        ? 500
+        : 500
       
       // Calculate height from width using the aspect ratio, then add space for window chrome
       const imageHeight = paintWidth / imageAspectRatio
@@ -60,9 +69,11 @@ export function DesktopIcon({ icon_path, icon_name }: DesktopIconProps) {
       // For pix, calculate window size using the known image dimensions: 3028 × 4961
       const imageAspectRatio = 3028 / 4961 // ≈ 0.610
       const pixWidth = isMobile 
-        ? Math.min(350, window.innerWidth - 20) 
-        : window.innerWidth < 1400
-        ? 280 // Smaller for medium screens
+        ? Math.min(350, screenWidth - 20)
+        : isSmallDesktop
+        ? 180
+        : isMediumDesktop
+        ? 280
         : 350
       
       // Calculate height from width using the aspect ratio, then add space for window chrome
@@ -86,7 +97,13 @@ export function DesktopIcon({ icon_path, icon_name }: DesktopIconProps) {
     } else if (isError) {
       // For campominado, calculate window size using the known image dimensions: 2970 × 3776
       const imageAspectRatio = 2970 / 3776 // ≈ 0.786
-      const errorWidth = isMobile ? Math.min(350, window.innerWidth - 20) : 300
+      const errorWidth = isMobile 
+        ? Math.min(350, screenWidth - 20)
+        : isSmallDesktop
+        ? 200
+        : isMediumDesktop
+        ? 300
+        : 300
       
       // Calculate height from width using the aspect ratio, then add space for window chrome
       const imageHeight = errorWidth / imageAspectRatio
@@ -110,9 +127,13 @@ export function DesktopIcon({ icon_path, icon_name }: DesktopIconProps) {
       // For contact, use a smaller window that fits the content
       const contactSize = isMobile
         ? {
-            width: Math.min(320, window.innerWidth - 20),
+            width: Math.min(320, screenWidth - 20),
             height: 200,
           }
+        : isSmallDesktop
+        ? { width: 260, height: 140 }
+        : isMediumDesktop
+        ? { width: 380, height: 190 }
         : { width: 400, height: 200 }
       
       openWindow({
@@ -126,20 +147,24 @@ export function DesktopIcon({ icon_path, icon_name }: DesktopIconProps) {
     } else if (isGallery) {
       windowSize = isMobile
         ? {
-            width: Math.min(320, window.innerWidth - 20),
+            width: Math.min(320, screenWidth - 20),
             height: Math.min(400, window.innerHeight - 140),
           }
-        : window.innerWidth < 1400
-        ? { width: 500, height: 400 } // Smaller size for medium screens
-        : { width: 740, height: 540 } // Same size as Computer window for large screens
+        : isSmallDesktop
+        ? { width: 320, height: 260 }
+        : isMediumDesktop
+        ? { width: 500, height: 400 }
+        : { width: 740, height: 540 }
     } else {
       // Default windows (including Computer). Make Computer 16:9
       if (icon_name === "Computer") {
         // Choose width based on device and derive height from 16:9
         const baseWidth = isMobile
-          ? Math.min(360, window.innerWidth - 20)
-          : window.innerWidth < 1400
-          ? 600 // Smaller for medium screens
+          ? Math.min(360, screenWidth - 20)
+          : isSmallDesktop
+          ? 380
+          : isMediumDesktop
+          ? 600
           : 800
         const baseHeight = isMobile
           ? Math.min(500, window.innerHeight - 100) // Increased height for mobile text reading
@@ -148,9 +173,13 @@ export function DesktopIcon({ icon_path, icon_name }: DesktopIconProps) {
       } else {
         windowSize = isMobile
           ? {
-              width: Math.min(280, window.innerWidth - 30),
+              width: Math.min(280, screenWidth - 30),
               height: Math.min(300, window.innerHeight - 140),
             }
+          : isSmallDesktop
+          ? { width: 320, height: 260 }
+          : isMediumDesktop
+          ? { width: 600, height: 480 }
           : { width: 740, height: 540 }
       }
     }

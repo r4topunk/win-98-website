@@ -66,9 +66,10 @@ export const VirtualImageGrid = memo(({ gallery, className }: VirtualImageGridPr
   // Function to determine number of columns based on container width
   const getGridColumns = (width: number): number => {
     if (width < 400) return 2
-    if (width < 600) return 3
-    if (width < 1000) return 4
-    return 6 // 6 columns for very wide windows
+    if (width < 500) return 3  // Small desktop range
+    if (width < 700) return 4  // Medium desktop range
+    if (width < 1000) return 5
+    return 6 // Large desktop
   }
 
   // Optimized resize tracking with debouncing
@@ -112,15 +113,19 @@ export const VirtualImageGrid = memo(({ gallery, className }: VirtualImageGridPr
       let windowHeight: number
       
       if (isMobile || viewportWidth < 768) {
-        // Mobile/small screens: compact size
+        // Mobile screens: compact size
         windowWidth = 300
         windowHeight = 250
+      } else if (viewportWidth < 1100) {
+        // Small desktop screens: compact size
+        windowWidth = 240
+        windowHeight = 190
       } else if (viewportWidth < 1400) {
-        // Medium screens (like 1352x878): smaller size
+        // Medium desktop screens: medium size
         windowWidth = 320
         windowHeight = 240
       } else {
-        // Large screens: even smaller
+        // Large desktop screens: larger size
         windowWidth = 360
         windowHeight = 280
       }

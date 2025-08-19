@@ -45,6 +45,8 @@ interface WindowState {
   // UI state
   screenDimensions: { width: number; height: number }
   isMobile: boolean
+  isSmallDesktop: boolean
+  isMediumDesktop: boolean
   
   // Performance tracking
   maxZIndex: number
@@ -71,6 +73,8 @@ const initialState: WindowState = {
     height: typeof window !== 'undefined' ? window.innerHeight : 0
   },
   isMobile: typeof window !== 'undefined' ? window.innerWidth < 768 : false,
+  isSmallDesktop: typeof window !== 'undefined' ? window.innerWidth >= 768 && window.innerWidth < 1100 : false,
+  isMediumDesktop: typeof window !== 'undefined' ? window.innerWidth >= 1100 && window.innerWidth < 1400 : false,
   maxZIndex: 10
 }
 
@@ -78,14 +82,24 @@ const initialState: WindowState = {
 const getDefaultWindowPosition = (
   screenDimensions: { width: number; height: number },
   windowCount: number,
-  isMobile: boolean
+  isMobile: boolean,
+  isSmallDesktop: boolean,
+  isMediumDesktop: boolean
 ) => {
   const defaultWidth = isMobile 
     ? Math.min(320, screenDimensions.width - 20)
-    : 950
+    : isSmallDesktop
+    ? 320
+    : isMediumDesktop
+    ? 600
+    : 740
   const defaultHeight = isMobile
     ? screenDimensions.height > 500 ? 400 : screenDimensions.height - 140
-    : 600
+    : isSmallDesktop
+    ? 260
+    : isMediumDesktop
+    ? 480
+    : 540
 
   const navbarHeight = 40
   const availableHeight = screenDimensions.height - navbarHeight
@@ -116,12 +130,28 @@ const getDefaultWindowPosition = (
 
 const getDefaultWindowSize = (
   screenDimensions: { width: number; height: number },
-  isMobile: boolean
+  isMobile: boolean,
+  isSmallDesktop: boolean,
+  isMediumDesktop: boolean
 ) => {
   if (isMobile) {
     return {
       width: Math.min(320, screenDimensions.width - 20),
       height: Math.min(400, screenDimensions.height - 140)
+    }
+  }
+  
+  if (isSmallDesktop) {
+    return {
+      width: 320,
+      height: 260
+    }
+  }
+  
+  if (isMediumDesktop) {
+    return {
+      width: 600,
+      height: 480
     }
   }
   
@@ -159,9 +189,16 @@ const windowSlice = createSlice({
       const defaultPosition = getDefaultWindowPosition(
         state.screenDimensions, 
         state.ids.length, 
-        state.isMobile
+        state.isMobile,
+        state.isSmallDesktop,
+        state.isMediumDesktop
       )
-      const defaultSize = getDefaultWindowSize(state.screenDimensions, state.isMobile)
+      const defaultSize = getDefaultWindowSize(
+        state.screenDimensions, 
+        state.isMobile,
+        state.isSmallDesktop,
+        state.isMediumDesktop
+      )
       
       const newWindow: WindowEntity = {
         id,
@@ -335,7 +372,10 @@ const windowSlice = createSlice({
       height: number
     }>) => {
       state.screenDimensions = action.payload
-      state.isMobile = action.payload.width < 768
+      const width = action.payload.width
+      state.isMobile = width < 768
+      state.isSmallDesktop = width >= 768 && width < 1100
+      state.isMediumDesktop = width >= 1100 && width < 1400
     }
   }
 })

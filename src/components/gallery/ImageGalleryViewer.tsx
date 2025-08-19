@@ -125,12 +125,16 @@ export function ImageGalleryViewer({
         // Mobile: compact video size
         videoWidth = 320
         videoHeight = 180 // 16:9 aspect ratio
+      } else if (viewportWidth < 1100) {
+        // Small desktop: compact video size
+        videoWidth = 300
+        videoHeight = 169 // 16:9 aspect ratio
       } else if (viewportWidth < 1400) {
-        // Medium screens: smaller size for 1352x878 etc
+        // Medium screens: medium video size
         videoWidth = 480
         videoHeight = 270 // 16:9 aspect ratio
       } else {
-        // Large screens: smaller video size than before
+        // Large screens: larger video size
         videoWidth = 600
         videoHeight = 337 // 16:9 aspect ratio
       }
