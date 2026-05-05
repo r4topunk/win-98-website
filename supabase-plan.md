@@ -68,33 +68,34 @@ Storage: single bucket `site-images`, public read, private write (secret key onl
 - [x] Keys in `.env.local`, `.env.example` committed
 - [x] REST + Storage access smoke-tested
 
-### Phase 2 — Schema
-- [ ] `pnpm add -D drizzle-kit drizzle-orm postgres`
-- [ ] `pnpm add @supabase/supabase-js`
-- [ ] `drizzle.config.ts` pointing at `DATABASE_URL`
-- [ ] `src/db/schema.ts` — galleries + images tables
-- [ ] `pnpm drizzle-kit generate` → first migration
-- [ ] `pnpm drizzle-kit migrate` → apply
-- [ ] In Dashboard: enable RLS + add `anon select` policies
+### Phase 2 — Schema (done ✓)
+- [x] `pnpm add @supabase/supabase-js` + dev: `tsx`, `dotenv`, `mime-types`
+- [x] **Drizzle skipped** — single `supabase/schema.sql` (idempotent), run in Dashboard SQL Editor
+- [x] Tables: `galleries`, `images`, `admins`
+- [x] RLS: public select on galleries/images; insert/update/delete gated by `admins.email = auth.email()`
+- [x] Storage bucket + policies created in same SQL file
 
-### Phase 3 — Storage bucket + seed
-- [ ] Create bucket `site-images` (public read)
-- [ ] `scripts/seed-storage.ts` — walk `public/site_images/`, upload each file preserving relative path
-- [ ] `scripts/seed-db.ts` — read `src/data/galleries.ts`, insert galleries + images rows with matching `storage_path`
-- [ ] Verify: `select count(*) from images` matches file count
+### Phase 3 — Storage bucket + seed (done ✓)
+- [x] Bucket `site-images` (public read) created via SQL
+- [x] `scripts/seed-storage.ts` — idempotent (skips files matching size)
+- [x] `scripts/seed-db.ts` — upsert by `(gallery_id, storage_path)`
+- [x] Run via `pnpm seed`
 
-### Phase 4 — Client wiring
-- [ ] `src/lib/supabase.ts` — singleton client from `VITE_SUPABASE_URL` + `VITE_SUPABASE_PUBLISHABLE_KEY`
-- [ ] `src/hooks/useGalleries.ts` — fetch + cache (simple `useState` + `useEffect`, no extra dep)
-- [ ] Refactor `ImageGalleryGrid` / `ImageGalleryViewer` to consume hook instead of `sampleGalleries` import
-- [ ] Replace `<img src="/site_images/...">` with `supabase.storage.from('site-images').getPublicUrl(path)`
-- [ ] Loading + error states (keep minimal — 98.css-styled)
+### Phase 4 — Client wiring (done ✓)
+- [x] `src/lib/supabase.ts` — singleton client, `publicImageUrl()` helper
+- [x] `src/hooks/useGalleries.tsx` — context + provider, single fetch on mount
+- [x] `WindowContents.tsx` consumes hook; `ImageGalleryGrid` / `Viewer` unchanged (URL is just a string)
 
-### Phase 5 — Cleanup
-- [ ] Delete `public/site_images/` from repo
-- [ ] Delete `sampleGalleries` export from `src/data/galleries.ts` (keep interfaces)
-- [ ] Update `architecture.md` — storage + DB section
-- [ ] Update `README.md` — env setup
+### Phase 5 — Admin UI (added scope, done ✓)
+- [x] `src/components/admin/AdminApp.tsx` — magic-link auth + admin-allowlist gate
+- [x] `src/components/admin/AdminPanel.tsx` — gallery CRUD, image upload/edit/reorder/delete
+- [x] Wired as desktop icon "Admin" inside the win98 desktop window manager
+
+### Phase 6 — Cleanup (todo)
+- [ ] Verify production build + dev run with real Supabase project
+- [ ] Delete `public/site_images/` (keep only `ui/` UI chrome) once Supabase confirmed
+- [ ] Delete `sampleGalleries` export from `src/data/galleries.ts` (keep file or remove)
+- [ ] Update `architecture.md` — storage + DB + admin sections
 
 ## Definition of done
 
@@ -118,4 +119,8 @@ Storage: single bucket `site-images`, public read, private write (secret key onl
 
 ## Next action
 
-Start Phase 2: install deps + write `src/db/schema.ts`.
+1. Run `supabase/schema.sql` in Supabase SQL Editor (Dashboard → SQL).
+2. `insert into admins (email) values ('your@email.com');`
+3. `pnpm seed` to migrate metadata + images.
+4. `pnpm dev`, verify galleries render. Open Admin icon, sign in via magic link, test CRUD.
+5. After confirmed: delete `public/site_images/<gallery>/` folders (keep `public/site_images/ui/` for background + menu).

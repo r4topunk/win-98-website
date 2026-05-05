@@ -1,111 +1,74 @@
 import { useState } from "react"
 import { ImageGalleryGrid } from "./gallery/ImageGalleryGrid"
 import { ImageGalleryViewer } from "./gallery/ImageGalleryViewer"
-import { sampleGalleries } from "../data/galleries"
 import { TextNoteViewer } from "./content/TextNoteViewer"
+import { useGallery, useGalleries } from "../hooks/useGalleries"
 
 interface WindowContentsProps {
   iconType: string
 }
 
+// Maps desktop icon name -> DB gallery id.
+const ICON_TO_GALLERY: Record<string, string> = {
+  Movies: "movies",
+  Images: "images",
+  "Album Covers": "album-covers",
+  Customs: "customs",
+  "Pelo mundo": "pelo-mundo",
+  Rejects: "rejects",
+  Desenhe: "paint",
+  "???": "pix",
+  Error: "campominado",
+}
+
+const SINGLE_IMAGE_VIEWERS: Record<string, string> = {
+  Desenhe: "desenhe",
+  "???": "pix-viewer",
+  Error: "campominado-viewer",
+}
+
+function GalleryFallback({ loading, error }: { loading: boolean; error: string | null }) {
+  if (loading) return <div className="p-2"><p>Loading...</p></div>
+  if (error) return <div className="p-2"><p>Error: {error}</p></div>
+  return <div className="p-2"><p>Gallery not found</p></div>
+}
+
 export function WindowContents({ iconType }: WindowContentsProps) {
   const [count, setCount] = useState(0)
+  const { loading, error } = useGalleries()
+  const galleryId = ICON_TO_GALLERY[iconType]
+  const gallery = useGallery(galleryId ?? "")
 
-  // Different content based on which icon was clicked
+  // Grid galleries
+  if (
+    iconType === "Movies" ||
+    iconType === "Images" ||
+    iconType === "Album Covers" ||
+    iconType === "Customs" ||
+    iconType === "Pelo mundo" ||
+    iconType === "Rejects"
+  ) {
+    return gallery ? (
+      <ImageGalleryGrid gallery={gallery} />
+    ) : (
+      <GalleryFallback loading={loading} error={error} />
+    )
+  }
+
+  // Single-image viewers
+  if (iconType in SINGLE_IMAGE_VIEWERS) {
+    return gallery ? (
+      <ImageGalleryViewer
+        gallery={gallery}
+        currentImageIndex={0}
+        windowId={SINGLE_IMAGE_VIEWERS[iconType]}
+      />
+    ) : (
+      <GalleryFallback loading={loading} error={error} />
+    )
+  }
+
   switch (iconType) {
-    case "Movies":
-      return sampleGalleries.movies ? (
-        <ImageGalleryGrid gallery={sampleGalleries.movies} />
-      ) : (
-        <div className="p-2">
-          <p>Gallery not found</p>
-        </div>
-      )
-
-    case "Images":
-      return sampleGalleries.images ? (
-        <ImageGalleryGrid gallery={sampleGalleries.images} />
-      ) : (
-        <div className="p-2">
-          <p>Gallery not found</p>
-        </div>
-      )
-
-    case "Album Covers":
-      return sampleGalleries.albumCovers ? (
-        <ImageGalleryGrid gallery={sampleGalleries.albumCovers} />
-      ) : (
-        <div className="p-2">
-          <p>Gallery not found</p>
-        </div>
-      )
-
-    case "Customs":
-      return sampleGalleries.customs ? (
-        <ImageGalleryGrid gallery={sampleGalleries.customs} />
-      ) : (
-        <div className="p-2">
-          <p>Gallery not found</p>
-        </div>
-      )
-
-    case "Pelo mundo":
-      return sampleGalleries.peloMundo ? (
-        <ImageGalleryGrid gallery={sampleGalleries.peloMundo} />
-      ) : (
-        <div className="p-2">
-          <p>Gallery not found</p>
-        </div>
-      )
-
-    case "Rejects":
-      return sampleGalleries.rejects ? (
-        <ImageGalleryGrid gallery={sampleGalleries.rejects} />
-      ) : (
-        <div className="p-2">
-          <p>Gallery not found</p>
-        </div>
-      )
-
-    case "Desenhe":
-      return sampleGalleries.paint ? (
-        <ImageGalleryViewer 
-          gallery={sampleGalleries.paint} 
-          currentImageIndex={0}
-          windowId="desenhe"
-        />
-      ) : (
-        <div className="p-2">
-          <p>Paint application not found</p>
-        </div>
-      )
-
-    case "???":
-      return sampleGalleries.pix ? (
-        <ImageGalleryViewer 
-          gallery={sampleGalleries.pix} 
-          currentImageIndex={0}
-          windowId="pix-viewer"
-        />
-      ) : (
-        <div className="p-2">
-          <p>Pix application not found</p>
-        </div>
-      )
-
-    case "Error":
-      return sampleGalleries.campominado ? (
-        <ImageGalleryViewer 
-          gallery={sampleGalleries.campominado} 
-          currentImageIndex={0}
-          windowId="campominado-viewer"
-        />
-      ) : (
-        <div className="p-2">
-          <p>Campominado game not found</p>
-        </div>
-      )
-
     case "Computer":
       return (
         <div className="w-full h-full">
@@ -137,7 +100,7 @@ export function WindowContents({ iconType }: WindowContentsProps) {
               className="object-contain"
             />
             <div>
-              <a 
+              <a
                 href="mailto:francisco.reis.skt@gmail.com"
                 className="text-lg font-semibold !text-black hover:underline"
               >
@@ -145,7 +108,7 @@ export function WindowContents({ iconType }: WindowContentsProps) {
               </a>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-4">
             <img
               src="/icons/camera-2.png"
@@ -155,17 +118,17 @@ export function WindowContents({ iconType }: WindowContentsProps) {
               className="object-contain"
             />
             <div>
-              <a 
-                href="https://instagram.com/franciscoskt" 
-                target="_blank" 
+              <a
+                href="https://instagram.com/franciscoskt"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="text-lg font-semibold !text-black hover:underline block"
               >
                 @franciscoskt
               </a>
-              <a 
-                href="https://instagram.com/sktfrancisco" 
-                target="_blank" 
+              <a
+                href="https://instagram.com/sktfrancisco"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="text-lg font-semibold !text-black hover:underline block"
               >
