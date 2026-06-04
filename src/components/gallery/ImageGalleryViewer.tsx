@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { ImageGallery } from "../../data/galleries"
+import type { ImageGallery } from "../../lib/types"
 import { cn } from "../../utils/cn"
 import { useWindowContext } from "../../contexts/EnhancedWindowContext"
 

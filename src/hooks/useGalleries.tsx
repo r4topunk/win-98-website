@@ -7,7 +7,8 @@ import {
   useMemo,
   useState,
 } from "react"
-import { publicImageUrl, supabase } from "../lib/supabase"
+import { isSupabaseConfigured, publicImageUrl, supabase } from "../lib/supabase"
+import { sampleGalleries } from "../data/galleries"
 import type {
   GalleryImage,
   GalleryRow,
@@ -41,11 +42,11 @@ async function fetchAll() {
   const [galleriesRes, imagesRes] = await Promise.all([
     supabase
       .from("galleries")
-      .select("*")
+      .select("id,name,sort_order")
       .order("sort_order", { ascending: true }),
     supabase
       .from("images")
-      .select("*")
+      .select("id,gallery_id,storage_path,alt,title,link,sort_order")
       .order("sort_order", { ascending: true }),
   ])
   if (galleriesRes.error) throw galleriesRes.error
@@ -63,6 +64,21 @@ export function GalleriesProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null)
 
   const load = useCallback(async () => {
+    // Offline / pre-Supabase mode: serve bundled sample data so the desktop
+    // renders without a backend. /admin remains unavailable.
+    if (!isSupabaseConfigured) {
+      const map: Record<string, ImageGallery> = {}
+      const list: Array<{ id: string; name: string }> = []
+      for (const [id, g] of Object.entries(sampleGalleries)) {
+        map[id] = g as ImageGallery
+        list.push({ id, name: g.name })
+      }
+      setById(map)
+      setList(list)
+      setError(null)
+      setLoading(false)
+      return
+    }
     setLoading(true)
     setError(null)
     try {

@@ -1,8 +1,19 @@
 import { memo, useState, useEffect, useRef, useMemo } from "react"
-import { GalleryImage, ImageGallery } from "../../data/galleries"
+import type { GalleryImage, ImageGallery } from "../../lib/types"
 import { useWindowContext } from "../../contexts/EnhancedWindowContext"
 import { cn } from "../../utils/cn"
 import { ImageGalleryViewer } from "./ImageGalleryViewer"
+
+// For local /site_images/<folder>/<name>.<ext> paths we have pre-generated
+// `<name>-thumb.webp` siblings (see scripts/gen-thumbs.ts). Use them in the
+// grid so we ship ~20-40KB per cell instead of the 1-3MB master. Non-local
+// URLs (Supabase storage, external CDNs) pass through unchanged.
+function thumbSrc(src: string): string {
+  if (!src.startsWith("/site_images/")) return src
+  const dot = src.lastIndexOf(".")
+  if (dot === -1) return src
+  return `${src.slice(0, dot)}-thumb.webp`
+}
 
 interface VirtualImageGridProps {
   gallery: ImageGallery
@@ -29,7 +40,7 @@ const MemoizedImageItem = memo(({
       {/* Image container with aspect ratio preservation */}
       <div className="aspect-square bg-gray-200 border border-gray-400 overflow-hidden group-hover:border-blue-400 transition-colors w-full">
         <img
-          src={image.src}
+          src={thumbSrc(image.src)}
           alt={image.alt}
           className={cn(
             "w-full h-full object-cover group-hover:opacity-90 transition-opacity",
@@ -38,6 +49,14 @@ const MemoizedImageItem = memo(({
           loading="lazy"
           decoding="async"
           onLoad={() => setIsLoaded(true)}
+          onError={(e) => {
+            // Fall back to the full-res master if the thumb is missing
+            // (e.g. a newly-added image not yet processed by `pnpm thumbs`).
+            const img = e.currentTarget
+            if (img.src !== window.location.origin + image.src && img.src !== image.src) {
+              img.src = image.src
+            }
+          }}
           style={{
             willChange: "auto",
           }}

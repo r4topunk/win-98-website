@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState, useRef, lazy, Suspense } from "react"
 import { ErrorBoundary } from "react-error-boundary"
 import { Navbar } from "./components/navbar"
 import { Desktop } from "./components/desktop"
@@ -11,7 +11,12 @@ import { IntroVideo } from "./components/IntroVideo"
 import { VintageTransition } from "./components/VintageTransition"
 import { CRTEffect } from "./components/CRTEffect"
 import { playClick } from "./services/sound"
-import { AdminApp } from "./components/admin/AdminApp"
+
+// Lazy-load admin surface so public visitors don't download AdminApp/AdminPanel
+// (and any admin-only Supabase auth code paths) in the main bundle.
+const AdminApp = lazy(() =>
+  import("./components/admin/AdminApp").then((m) => ({ default: m.AdminApp })),
+)
 
 function ErrorFallback({ error }: { error: Error }) {
   return (
@@ -37,7 +42,9 @@ function AdminPage() {
           </div>
           <div className="window-body" style={{ margin: 0, padding: 0 }}>
             <ErrorBoundary FallbackComponent={ErrorFallback}>
-              <AdminApp />
+              <Suspense fallback={null}>
+                <AdminApp />
+              </Suspense>
             </ErrorBoundary>
           </div>
         </div>

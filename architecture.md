@@ -48,7 +48,6 @@
 ```
 franciscoskt/
 ├── public/                     # Static assets
-│   ├── bg.jpg                 # Desktop background image
 │   ├── intro.webm             # Intro video file
 │   ├── mouse-click.wav        # UI sound effect
 │   ├── vite.svg               # Vite logo

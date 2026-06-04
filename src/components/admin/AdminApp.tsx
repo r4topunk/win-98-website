@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import type { Session } from "@supabase/supabase-js"
-import { supabase } from "../../lib/supabase"
+import { isSupabaseConfigured, supabase } from "../../lib/supabase"
 import { AdminPanel } from "./AdminPanel"
 
 type AuthState =
@@ -28,20 +28,42 @@ async function resolveAuthState(session: Session | null): Promise<AuthState> {
 }
 
 export function AdminApp() {
-  const [auth, setAuth] = useState<AuthState>({ kind: "loading" })
+  const [auth, setAuth] = useState<AuthState>(
+    isSupabaseConfigured ? { kind: "loading" } : { kind: "anon" },
+  )
   const [email, setEmail] = useState("")
   const [sendingLink, setSendingLink] = useState(false)
   const [linkMessage, setLinkMessage] = useState<string | null>(null)
 
   useEffect(() => {
+    if (!isSupabaseConfigured) return
     // onAuthStateChange fires INITIAL_SESSION immediately on subscribe,
     // so we don't also call getSession() (avoids StrictMode double-mount lock).
+    // Cache the last-resolved email to skip redundant `admins` SELECTs on
+    // TOKEN_REFRESHED/USER_UPDATED events (Supabase auto-refreshes ~every 50min).
+    let lastEmail: string | null = null
     const { data: sub } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      const nextEmail = session?.user?.email ?? null
+      if (nextEmail && nextEmail === lastEmail) return
+      lastEmail = nextEmail
       const next = await resolveAuthState(session)
       setAuth(next)
     })
     return () => sub.subscription.unsubscribe()
   }, [])
+
+  if (!isSupabaseConfigured) {
+    return (
+      <div className="p-3 flex flex-col gap-2">
+        <p className="font-bold">Admin unavailable</p>
+        <p className="text-xs">
+          Set <code>VITE_SUPABASE_URL</code> and{" "}
+          <code>VITE_SUPABASE_PUBLISHABLE_KEY</code> in <code>.env.local</code>{" "}
+          to enable the admin panel.
+        </p>
+      </div>
+    )
+  }
 
   async function sendLink(e: React.FormEvent) {
     e.preventDefault()

@@ -2,12 +2,10 @@ import { memo, useMemo } from "react"
 import { useAppSelector } from "../store/hooks"
 import { selectVisibleWindows } from "../store/selectors"
 import { OptimizedWindow } from "./OptimizedWindow"
-import { useWindowContext } from "../contexts/EnhancedWindowContext"
 
 // Virtual window manager that only renders windows in viewport
 export const VirtualWindowManager = memo(() => {
   const visibleWindows = useAppSelector(selectVisibleWindows)
-  const { closeWindow } = useWindowContext()
 
   // Only render windows that are actually visible on screen
   const renderableWindows = useMemo(() => {
@@ -44,7 +42,6 @@ export const VirtualWindowManager = memo(() => {
         <OptimizedWindow
           key={window.id}
           windowId={window.id}
-          onClose={() => closeWindow(window.id)}
         />
       ))}
     </>
