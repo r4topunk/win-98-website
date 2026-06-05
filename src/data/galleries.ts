@@ -226,8 +226,8 @@ export const sampleGalleries: Record<string, ImageGallery> = {
       },
     ],
   },
-  albumCovers: {
-    id: "albumCovers",
+  "album-covers": {
+    id: "album-covers",
     name: "Album Covers",
     images: [
       {
@@ -528,8 +528,8 @@ export const sampleGalleries: Record<string, ImageGallery> = {
       },
     ],
   },
-  peloMundo: {
-    id: "peloMundo",
+  "pelo-mundo": {
+    id: "pelo-mundo",
     name: "Pelo Mundo",
     images: [
       {
