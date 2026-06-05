@@ -6,19 +6,6 @@
 import { sampleGalleries } from "../src/data/galleries"
 import { adminClient } from "./_admin-client"
 
-// TS gallery key -> DB id (slug).
-const GALLERY_ID_MAP: Record<string, string> = {
-  movies: "movies",
-  images: "images",
-  albumCovers: "album-covers",
-  customs: "customs",
-  peloMundo: "pelo-mundo",
-  rejects: "rejects",
-  paint: "paint",
-  pix: "pix",
-  campominado: "campominado",
-}
-
 // Strip the leading "/site_images/" from `src` to get the storage path.
 function toStoragePath(src: string): string {
   return src.replace(/^\/site_images\//, "")
@@ -26,7 +13,7 @@ function toStoragePath(src: string): string {
 
 async function upsertGalleries() {
   const rows = Object.entries(sampleGalleries).map(([key, g], idx) => ({
-    id: GALLERY_ID_MAP[key] ?? key,
+    id: key,
     name: g.name,
     sort_order: idx,
   }))
@@ -40,9 +27,8 @@ async function upsertGalleries() {
 async function upsertImages() {
   let total = 0
   for (const [key, gallery] of Object.entries(sampleGalleries)) {
-    const galleryId = GALLERY_ID_MAP[key] ?? key
     const rows = gallery.images.map((img, idx) => ({
-      gallery_id: galleryId,
+      gallery_id: key,
       storage_path: toStoragePath(img.src),
       alt: img.alt ?? null,
       title: img.title ?? null,
@@ -54,7 +40,7 @@ async function upsertImages() {
       .upsert(rows, { onConflict: "gallery_id,storage_path" })
     if (error) throw error
     total += rows.length
-    console.log(`  ${galleryId}: ${rows.length} images`)
+    console.log(`  ${key}: ${rows.length} images`)
   }
   console.log(`upserted ${total} images`)
 }
