@@ -88,8 +88,7 @@ export const IntroVideo = ({ onComplete }: IntroVideoProps) => {
           preload="auto"
           muted
         >
-          <source src={`/intro.webm?t=${Date.now()}`} type="video/webm" />
-          <source src={`/intro.mp4?t=${Date.now()}`} type="video/mp4" />
+          <source src="/intro.webm" type="video/webm" />
         </video>
         
         {/* CRT Effect Overlay */}
