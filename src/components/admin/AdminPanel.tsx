@@ -25,6 +25,8 @@ export function AdminPanel({ email, onSignOut }: Props) {
   const [images, setImages] = useState<ImageRow[]>([])
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState<string | null>(null)
+  const [filter, setFilter] = useState("")
+  const [lastSavedAt, setLastSavedAt] = useState<number | null>(null)
 
   useEffect(() => {
     void loadGalleries()
@@ -60,6 +62,7 @@ export function AdminPanel({ email, onSignOut }: Props) {
   async function refreshAll() {
     if (selectedId) await loadImages(selectedId)
     await reload()
+    setLastSavedAt(Date.now())
   }
 
   async function addItem(payload: {
@@ -117,7 +120,8 @@ export function AdminPanel({ email, onSignOut }: Props) {
   }
 
   async function deleteImage(img: ImageRow) {
-    if (!confirm("Delete this image?")) return
+    const label = img.title ? `"${img.title}"` : "this image"
+    if (!confirm(`Delete ${label}? This cannot be undone.`)) return
     setBusy(true)
     setMsg(null)
     const { error: sErr } = await supabase.storage
@@ -157,74 +161,131 @@ export function AdminPanel({ email, onSignOut }: Props) {
     [selectedId]
   )
 
+  const filtered = useMemo(() => {
+    const q = filter.trim().toLowerCase()
+    if (!q) return images
+    return images.filter(
+      (i) =>
+        (i.title ?? "").toLowerCase().includes(q) ||
+        i.storage_path.toLowerCase().includes(q)
+    )
+  }, [images, filter])
+
   return (
-    <div className="p-2 flex flex-col gap-2 h-full overflow-auto text-xs">
+    <div className="admin-panel flex flex-col h-full text-xs">
       {/* Header */}
-      <div className="field-row" style={{ justifyContent: "space-between" }}>
+      <div
+        className="field-row"
+        style={{ justifyContent: "space-between", padding: "6px 8px 0" }}
+      >
         <span>
           Signed in: <b>{email}</b>
         </span>
         <button onClick={onSignOut}>Sign out</button>
       </div>
 
-      {msg && <p className="text-[11px]">{msg}</p>}
+      {msg && (
+        <p className="text-[11px]" style={{ padding: "0 8px" }}>
+          {msg}
+        </p>
+      )}
 
-      {/* Gallery picker */}
-      <fieldset>
-        <legend>Gallery</legend>
-        <div className="field-row">
-          <select
-            value={selectedId}
-            onChange={(e) => setSelectedId(e.target.value)}
-            disabled={busy}
-          >
-            {galleries.map((g) => (
-              <option key={g.id} value={g.id}>
-                {g.name}
-              </option>
-            ))}
-          </select>
-          {cfg && (
-            <span className="ml-2 text-[11px] text-gray-700">
-              type: <b>{cfg.kind}</b>
-            </span>
+      {/* Body: two-column on wide screens */}
+      <div className="flex-1 overflow-auto p-2 grid gap-2 lg:grid-cols-[minmax(280px,360px)_1fr] lg:items-start">
+        {/* Left column: gallery + add form (sticky on lg) */}
+        <div className="flex flex-col gap-2 lg:sticky lg:top-0">
+          <fieldset>
+            <legend>Gallery</legend>
+            <div className="field-row">
+              <select
+                value={selectedId}
+                onChange={(e) => setSelectedId(e.target.value)}
+                disabled={busy}
+              >
+                {galleries.map((g) => (
+                  <option key={g.id} value={g.id}>
+                    {g.name}
+                  </option>
+                ))}
+              </select>
+              {cfg && (
+                <span className="ml-2 text-[11px] text-gray-700">
+                  type: <b>{cfg.kind}</b>
+                </span>
+              )}
+            </div>
+          </fieldset>
+
+          {selectedGallery && cfg && (
+            <AddItemForm
+              key={selectedId}
+              galleryName={selectedGallery.name}
+              cfg={cfg}
+              busy={busy}
+              onSubmit={addItem}
+            />
           )}
         </div>
-      </fieldset>
 
-      {/* Add new item — typed form */}
-      {selectedGallery && cfg && (
-        <AddItemForm
-          key={selectedId}
-          galleryName={selectedGallery.name}
-          cfg={cfg}
-          busy={busy}
-          onSubmit={addItem}
-        />
-      )}
-
-      {/* Existing items */}
-      {selectedGallery && cfg && (
-        <fieldset>
-          <legend>Items — {selectedGallery.name}</legend>
-          <div className="flex flex-col gap-1">
-            {images.length === 0 && <p>No items yet.</p>}
-            {images.map((img, idx) => (
-              <ImageRowEditor
-                key={img.id}
-                img={img}
-                cfg={cfg}
-                isFirst={idx === 0}
-                isLast={idx === images.length - 1}
-                onUpdate={(patch) => updateImage(img.id, patch)}
-                onDelete={() => deleteImage(img)}
-                onMoveUp={() => moveImage(img, -1)}
-                onMoveDown={() => moveImage(img, 1)}
+        {/* Right column: items */}
+        {selectedGallery && cfg && (
+          <fieldset>
+            <legend>
+              Items — {selectedGallery.name} ({images.length})
+            </legend>
+            <div className="field-row-stacked" style={{ marginBottom: 6 }}>
+              <label htmlFor="admin-filter">Filter</label>
+              <input
+                id="admin-filter"
+                type="search"
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+                placeholder="Search title or path..."
               />
-            ))}
-          </div>
-        </fieldset>
-      )}
+            </div>
+            <div className="flex flex-col gap-1">
+              {images.length === 0 && <p>No items yet.</p>}
+              {images.length > 0 && filtered.length === 0 && (
+                <p>No matches for "{filter}".</p>
+              )}
+              {filtered.map((img) => {
+                const idx = images.findIndex((i) => i.id === img.id)
+                return (
+                  <ImageRowEditor
+                    key={img.id}
+                    img={img}
+                    cfg={cfg}
+                    isFirst={idx === 0}
+                    isLast={idx === images.length - 1}
+                    onUpdate={(patch) => updateImage(img.id, patch)}
+                    onDelete={() => deleteImage(img)}
+                    onMoveUp={() => moveImage(img, -1)}
+                    onMoveDown={() => moveImage(img, 1)}
+                  />
+                )
+              })}
+            </div>
+          </fieldset>
+        )}
+      </div>
+
+      {/* Status bar */}
+      <div className="admin-status-bar">
+        <span>
+          {busy
+            ? "Working..."
+            : selectedGallery
+            ? `${images.length} item${images.length === 1 ? "" : "s"}${
+                filter ? ` · ${filtered.length} shown` : ""
+              }`
+            : "Ready"}
+        </span>
+        <span>
+          {lastSavedAt
+            ? `Last saved ${new Date(lastSavedAt).toLocaleTimeString()}`
+            : "—"}
+        </span>
+      </div>
     </div>
   )
 }
@@ -360,11 +421,11 @@ function ImageRowEditor({
     (cfg.hasLink && (link || "") !== (img.link ?? ""))
 
   return (
-    <div className="border border-gray-400 p-1 flex gap-2 items-start">
+    <div className="admin-row flex gap-2 items-start">
       <img
         src={publicImageUrl(img.storage_path)}
-        alt={img.alt ?? ""}
-        className="w-16 h-16 object-cover border border-gray-500 flex-shrink-0"
+        alt={img.alt ?? img.title ?? ""}
+        className="admin-thumb"
         loading="lazy"
       />
       <div className="flex-1 flex flex-col gap-1">
