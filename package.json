@@ -13,7 +13,8 @@
     "seed": "pnpm seed:storage && pnpm seed:db",
     "admin:link": "tsx scripts/admin-magic-link.ts",
     "admin:diag": "tsx scripts/diag-auth.ts",
-    "thumbs": "tsx scripts/gen-thumbs.ts"
+    "thumbs": "tsx scripts/gen-thumbs.ts",
+    "thumbs:backfill": "tsx scripts/backfill-thumbs.ts"
   },
   "dependencies": {
     "98.css": "^0.1.20",
