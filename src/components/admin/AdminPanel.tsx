@@ -7,6 +7,7 @@ import {
   GALLERY_TYPES,
   type GalleryTypeConfig,
 } from "../../lib/galleryTypes"
+import { generateThumbBlob, thumbStoragePath } from "../../lib/imageThumb"
 
 interface Props {
   email: string
@@ -94,6 +95,22 @@ export function AdminPanel({ email, onSignOut }: Props) {
       return setMsg(`upload: ${upErr.message}`)
     }
 
+    // Thumb is best-effort: master is already up; grid falls back to it via
+    // onError if the thumb is missing. Log a soft warning if it fails so we
+    // don't silently ship slow images.
+    try {
+      const thumb = await generateThumbBlob(payload.file)
+      const { error: thumbErr } = await supabase.storage
+        .from(STORAGE_BUCKET)
+        .upload(thumbStoragePath(storagePath), thumb, {
+          contentType: "image/webp",
+          upsert: true,
+        })
+      if (thumbErr) console.warn("thumb upload failed:", thumbErr.message)
+    } catch (e) {
+      console.warn("thumb generation failed:", (e as Error).message)
+    }
+
     const { error: insErr } = await supabase.from("images").insert({
       gallery_id: selectedId,
       storage_path: storagePath,
@@ -103,7 +120,9 @@ export function AdminPanel({ email, onSignOut }: Props) {
       sort_order: baseOrder,
     })
     if (insErr) {
-      await supabase.storage.from(STORAGE_BUCKET).remove([storagePath])
+      await supabase.storage
+        .from(STORAGE_BUCKET)
+        .remove([storagePath, thumbStoragePath(storagePath)])
       setBusy(false)
       return setMsg(`insert: ${insErr.message}`)
     }
@@ -126,7 +145,7 @@ export function AdminPanel({ email, onSignOut }: Props) {
     setMsg(null)
     const { error: sErr } = await supabase.storage
       .from(STORAGE_BUCKET)
-      .remove([img.storage_path])
+      .remove([img.storage_path, thumbStoragePath(img.storage_path)])
     if (sErr) {
       setBusy(false)
       return setMsg(`storage: ${sErr.message}`)

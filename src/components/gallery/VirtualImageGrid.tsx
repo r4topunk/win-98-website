@@ -3,12 +3,22 @@ import type { GalleryImage, ImageGallery } from "../../lib/types"
 import { useWindowContext } from "../../contexts/EnhancedWindowContext"
 import { cn } from "../../utils/cn"
 import { ImageGalleryViewer } from "./ImageGalleryViewer"
+import { publicImageUrl } from "../../lib/supabase"
+import { thumbStoragePath } from "../../lib/imageThumb"
 
-// For local /site_images/<folder>/<name>.<ext> paths we have pre-generated
-// `<name>-thumb.webp` siblings (see scripts/gen-thumbs.ts). Use them in the
-// grid so we ship ~20-40KB per cell instead of the 1-3MB master. Non-local
-// URLs (Supabase storage, external CDNs) pass through unchanged.
-function thumbSrc(src: string): string {
+// Pick a thumbnail URL by mirroring the same `<base>-thumb.webp` convention
+// in both places we host images:
+//  - Local /site_images/<folder>/<name>.<ext> → sibling produced by
+//    scripts/gen-thumbs.ts at build/dev time.
+//  - Supabase Storage assets → sibling produced by AdminPanel on upload
+//    (see src/lib/imageThumb.ts).
+// External URLs we don't control pass through. onError below falls back to
+// the master if the thumb 404s (e.g. legacy rows uploaded before this).
+function thumbSrc(image: GalleryImage): string {
+  if (image.storagePath) {
+    return publicImageUrl(thumbStoragePath(image.storagePath))
+  }
+  const src = image.src
   if (!src.startsWith("/site_images/")) return src
   const dot = src.lastIndexOf(".")
   if (dot === -1) return src
@@ -40,7 +50,7 @@ const MemoizedImageItem = memo(({
       {/* Image container with aspect ratio preservation */}
       <div className="aspect-square bg-gray-200 border border-gray-400 overflow-hidden group-hover:border-blue-400 transition-colors w-full">
         <img
-          src={thumbSrc(image.src)}
+          src={thumbSrc(image)}
           alt={image.alt}
           className={cn(
             "w-full h-full object-cover group-hover:opacity-90 transition-opacity",
