@@ -71,7 +71,7 @@ export function AdminApp() {
     setSendingLink(true)
     const { error } = await supabase.auth.signInWithOtp({
       email: email.trim(),
-      options: { emailRedirectTo: window.location.origin },
+      options: { emailRedirectTo: `${window.location.origin}/admin` },
     })
     setSendingLink(false)
     setLinkMessage(error ? `Error: ${error.message}` : "Magic link sent. Check your email.")
