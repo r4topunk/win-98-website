@@ -34,10 +34,30 @@ create index if not exists images_gallery_sort_idx
   on public.images (gallery_id, sort_order);
 
 -- Admin allowlist. Insert your own email manually after running this file.
+-- Hard-capped at 2 rows by the admins_cap_trigger below — to rotate, DELETE
+-- an existing row first, then INSERT the new one.
 create table if not exists public.admins (
   email      text primary key,
   created_at timestamptz not null default now()
 );
+
+-- Hard cap: never more than 2 admins. Belt-and-suspenders even when running
+-- as service_role (which bypasses RLS). To rotate: DELETE first, then INSERT.
+create or replace function public.enforce_admins_cap()
+returns trigger language plpgsql as $$
+begin
+  if (select count(*) from public.admins) >= 2 then
+    raise exception 'admins table is capped at 2 rows (current count: %)',
+      (select count(*) from public.admins);
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists admins_cap_trigger on public.admins;
+create trigger admins_cap_trigger
+  before insert on public.admins
+  for each row execute function public.enforce_admins_cap();
 
 -- ============================================================
 -- updated_at triggers
