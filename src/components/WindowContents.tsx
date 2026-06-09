@@ -27,15 +27,45 @@ const SINGLE_IMAGE_VIEWERS: Record<string, string> = {
   Error: "campominado-viewer",
 }
 
-function GalleryFallback({ loading, error }: { loading: boolean; error: string | null }) {
-  if (loading) return <div className="p-2"><p>Loading...</p></div>
-  if (error) return <div className="p-2"><p>Error: {error}</p></div>
-  return <div className="p-2"><p>Gallery not found</p></div>
+function GalleryFallback({
+  loading,
+  error,
+  onReload,
+}: {
+  loading: boolean
+  error: string | null
+  onReload: () => void
+}) {
+  if (loading) return <div className="p-2"><p>Carregando…</p></div>
+  if (error) {
+    // The actual error message is already in console.error from useGalleries.
+    // Surface a friendly Win98 line, not the raw Supabase string.
+    return (
+      <div className="p-3 flex flex-col gap-2 items-start">
+        <p>Não consegui carregar essa galeria agora.</p>
+        <div className="field-row">
+          <button onClick={onReload}>Tentar de novo</button>
+        </div>
+      </div>
+    )
+  }
+  return <div className="p-2"><p>Galeria não encontrada</p></div>
+}
+
+function FallbackBanner() {
+  return (
+    <div
+      role="status"
+      className="text-xs px-2 py-1 border-b border-[#808080] bg-[#ffffe1]"
+    >
+      Mostrando conteúdo de demonstração — sem conexão com o servidor.
+    </div>
+  )
 }
 
 export function WindowContents({ iconType }: WindowContentsProps) {
   const [count, setCount] = useState(0)
-  const { loading, error } = useGalleries()
+  const { loading, error, usingFallback, reload } = useGalleries()
   const galleryId = ICON_TO_GALLERY[iconType]
   const gallery = useGallery(galleryId ?? "")
 
@@ -49,9 +79,12 @@ export function WindowContents({ iconType }: WindowContentsProps) {
     iconType === "Rejects"
   ) {
     return gallery ? (
-      <ImageGalleryGrid gallery={gallery} />
+      <div className="flex flex-col h-full">
+        {usingFallback && <FallbackBanner />}
+        <div className="flex-1 min-h-0"><ImageGalleryGrid gallery={gallery} /></div>
+      </div>
     ) : (
-      <GalleryFallback loading={loading} error={error} />
+      <GalleryFallback loading={loading} error={error} onReload={() => void reload()} />
     )
   }
 
@@ -64,7 +97,7 @@ export function WindowContents({ iconType }: WindowContentsProps) {
         windowId={SINGLE_IMAGE_VIEWERS[iconType]}
       />
     ) : (
-      <GalleryFallback loading={loading} error={error} />
+      <GalleryFallback loading={loading} error={error} onReload={() => void reload()} />
     )
   }
 

@@ -1,4 +1,4 @@
-import { memo, useState, useEffect, useRef, useMemo } from "react"
+import { memo, useState, useEffect, useRef, useMemo, useCallback } from "react"
 import type { GalleryImage, ImageGallery } from "../../lib/types"
 import { useWindowContext } from "../../contexts/EnhancedWindowContext"
 import { cn } from "../../utils/cn"
@@ -31,14 +31,20 @@ interface VirtualImageGridProps {
 }
 
 // Memoized image component to prevent unnecessary re-renders
-const MemoizedImageItem = memo(({ 
-  image, 
-  index, 
-  onClick
+const MemoizedImageItem = memo(({
+  image,
+  index,
+  onClick,
+  onDims,
 }: {
   image: GalleryImage
   index: number
   onClick: (image: GalleryImage, index: number) => void
+  // Capture the thumbnail's natural dimensions so the click handler can
+  // size the viewer window with the correct aspect ratio. Thumbnails are
+  // proportional scaledowns of the masters, so naturalWidth/Height share
+  // the same aspect as the master.
+  onDims: (index: number, w: number, h: number) => void
 }) => {
   const [isLoaded, setIsLoaded] = useState(false)
 
@@ -58,7 +64,13 @@ const MemoizedImageItem = memo(({
           )}
           loading="lazy"
           decoding="async"
-          onLoad={() => setIsLoaded(true)}
+          onLoad={(e) => {
+            setIsLoaded(true)
+            const img = e.currentTarget
+            if (img.naturalWidth > 0 && img.naturalHeight > 0) {
+              onDims(index, img.naturalWidth, img.naturalHeight)
+            }
+          }}
           onError={(e) => {
             // Fall back to the full-res master if the thumb is missing
             // (e.g. a newly-added image not yet processed by `pnpm thumbs`).
@@ -133,31 +145,78 @@ export const VirtualImageGrid = memo(({ gallery, className }: VirtualImageGridPr
 
   const columns = useMemo(() => getGridColumns(containerWidth), [containerWidth])
 
-  const handleImageClick = useMemo(() => 
+  // Stores (index → naturalWidth/Height) captured from each thumbnail's
+  // onLoad. Ref instead of state — we only read it at click time and don't
+  // want a re-render every time a thumb finishes loading.
+  const naturalDimsRef = useRef<Map<number, { w: number; h: number }>>(new Map())
+  const recordNaturalDims = useCallback((index: number, w: number, h: number) => {
+    naturalDimsRef.current.set(index, { w, h })
+  }, [])
+
+  const handleImageClick = useCallback(
     (image: GalleryImage, index: number) => {
-      // Use sensible fixed sizes for different screen categories
+      // Open each viewer at a size that matches the image's aspect ratio,
+      // so a square painting gets a square window, a portrait photo gets a
+      // tall window, a wide landscape gets a wide window. Aspect comes from
+      // DB metadata (image.width/height) first, then from the thumbnail's
+      // natural dimensions captured on load. If neither is available we
+      // fall back to a comfortable landscape default.
       const viewportWidth = window.innerWidth
-      
+      const viewportHeight = window.innerHeight
+      const isPhone = isMobile || viewportWidth < 768
+
+      // Chrome that doesn't show the image
+      const TITLE_BAR = 30
+      const STATUS_BAR = gallery.images.length > 1 ? 24 : 0
+      const CHROME_H = TITLE_BAR + STATUS_BAR
+
+      // Outer bounds — the window never gets bigger than the visible
+      // desktop. Multiplier > 0.8 leaves room for the taskbar / margins.
+      const maxW = isPhone
+        ? viewportWidth - 20
+        : Math.min(Math.round(viewportWidth * 0.85), 1100)
+      const maxH = isPhone
+        ? viewportHeight - 100
+        : Math.min(Math.round(viewportHeight * 0.85), 800)
+      // Floor — chrome (title bar, status bar, close X) needs to stay
+      // readable and tappable even for tiny stamp-sized originals.
+      const minW = isPhone ? 280 : 360
+      const minH = isPhone ? 260 : 280
+      const maxImageH = maxH - CHROME_H
+
+      // Source of truth for aspect ratio
+      const fromMeta =
+        image.width && image.height
+          ? { w: image.width, h: image.height }
+          : null
+      const fromGrid = naturalDimsRef.current.get(index)
+      const dims = fromMeta || fromGrid
+
       let windowWidth: number
       let windowHeight: number
-      
-      if (isMobile || viewportWidth < 768) {
-        // Mobile screens: compact size
-        windowWidth = 300
-        windowHeight = 250
-      } else if (viewportWidth < 1150) {
-        // Small desktop screens: smaller size
-        windowWidth = 200
-        windowHeight = 160
-      } else if (viewportWidth < 1400) {
-        // Medium desktop screens: medium size
-        windowWidth = 320
-        windowHeight = 240
+
+      if (dims) {
+        const aspect = dims.w / dims.h
+        // Try fitting by width first
+        let imgW = Math.min(dims.w, maxW)
+        let imgH = imgW / aspect
+        // If too tall, fit by height
+        if (imgH > maxImageH) {
+          imgH = maxImageH
+          imgW = imgH * aspect
+        }
+        windowWidth = Math.round(imgW)
+        windowHeight = Math.round(imgH + CHROME_H)
       } else {
-        // Large desktop screens: larger size
-        windowWidth = 360
-        windowHeight = 280
+        // Aspect unknown — use a sensible landscape default that's bigger
+        // than the old 200×160 but doesn't dominate the desktop.
+        windowWidth = isPhone ? Math.min(maxW, 500) : Math.min(maxW, 800)
+        windowHeight = isPhone ? Math.min(maxH, 520) : Math.min(maxH, 600)
       }
+
+      // Final bounds clamp
+      windowWidth = Math.min(Math.max(windowWidth, minW), maxW)
+      windowHeight = Math.min(Math.max(windowHeight, minH), maxH)
 
       const windowId = `${gallery.id}-viewer-${index}`
 
@@ -165,16 +224,17 @@ export const VirtualImageGrid = memo(({ gallery, className }: VirtualImageGridPr
         id: windowId,
         title: `${gallery.name} - ${image.title || `Image ${index + 1}`}`,
         content: (
-          <ImageGalleryViewer 
-            gallery={gallery} 
-            currentImageIndex={index} 
+          <ImageGalleryViewer
+            gallery={gallery}
+            currentImageIndex={index}
             windowId={windowId}
           />
         ),
-        noScroll: true, // Disable scroll to let image display at natural height
+        noScroll: true,
         size: { width: windowWidth, height: windowHeight },
       })
-    }, [gallery, isMobile, openWindow]
+    },
+    [gallery, isMobile, openWindow]
   )
 
   return (
@@ -193,6 +253,7 @@ export const VirtualImageGrid = memo(({ gallery, className }: VirtualImageGridPr
               image={image}
               index={index}
               onClick={handleImageClick}
+              onDims={recordNaturalDims}
             />
           ))}
         </div>

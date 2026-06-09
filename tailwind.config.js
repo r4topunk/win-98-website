@@ -6,6 +6,7 @@ export default {
       animation: {
         scan: "scan 12s linear infinite",
         fade: "fade 3s ease-in-out infinite",
+        flicker: "flicker 0.18s steps(2) infinite",
         "scan-slow": "scan 16s linear infinite",
       },
       keyframes: {
@@ -16,6 +17,13 @@ export default {
         fade: {
           "0%, 100%": { opacity: "0.2" },
           "50%": { opacity: "0.3" },
+        },
+        // animate-flicker was referenced in VintageTransition with no
+        // matching keyframe — silently dead. A short 2-step flicker fits
+        // the CRT/vintage transition vibe.
+        flicker: {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.5" },
         },
       },
       backgroundImage: {

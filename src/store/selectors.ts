@@ -17,9 +17,19 @@ export const selectAllWindows = createSelector(
   (entities, ids) => ids.map((id: string) => entities[id])
 )
 
+// "Visible" = on-screen RIGHT NOW (open, not minimized). Use this when you
+// want to know what the user is actually seeing.
 export const selectVisibleWindows = createSelector(
   [selectAllWindows],
   (windows: WindowEntity[]) => windows.filter((window: WindowEntity) => window.isOpen && !window.isMinimized)
+)
+
+// "Renderable" = should stay mounted (open, even if currently minimized).
+// Minimized windows keep their DOM via `display: none` so YouTube playback,
+// scroll position, and in-progress text survive a minimize/restore cycle.
+export const selectRenderableWindows = createSelector(
+  [selectAllWindows],
+  (windows: WindowEntity[]) => windows.filter((window: WindowEntity) => window.isOpen)
 )
 
 export const selectWindowsByZIndex = createSelector(

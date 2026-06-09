@@ -20,6 +20,16 @@
     <link rel="canonical" href="https://franciscoskt.com/" />
     <link rel="icon" type="image/png" href="/icons/windows_slanted-0.png" />
 
+    <!-- The desktop wallpaper is the first paint after the intro/transition,
+         so prefetch it at high priority instead of waiting for the Tailwind
+         bg-[url(...)] resolve at render time. -->
+    <link
+      rel="preload"
+      as="image"
+      href="/site_images/ui/background.webp"
+      fetchpriority="high"
+    />
+
     <!-- Open Graph -->
     <meta property="og:type" content="profile" />
     <meta property="og:site_name" content="franciscoskt" />

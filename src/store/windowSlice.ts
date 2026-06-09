@@ -187,19 +187,57 @@ const windowSlice = createSlice({
 
       // Create new window
       const defaultPosition = getDefaultWindowPosition(
-        state.screenDimensions, 
-        state.ids.length, 
+        state.screenDimensions,
+        state.ids.length,
         state.isMobile,
         state.isSmallDesktop,
         state.isMediumDesktop
       )
       const defaultSize = getDefaultWindowSize(
-        state.screenDimensions, 
+        state.screenDimensions,
         state.isMobile,
         state.isSmallDesktop,
         state.isMediumDesktop
       )
-      
+
+      // Clamp size to viewport — the per-category sizes (e.g. 740×540 for
+      // large desktops) assumed a body zoom 1.0 viewport, but the
+      // `body { zoom: 1.25 }` rule scales every CSS pixel up 25%, so a
+      // nominally-fitting window now overflows. Cap to (viewport / zoom)
+      // minus a small margin so the window stays inside the visible desk.
+      const NAVBAR_HEIGHT = 32
+      const requestedSize = size || defaultSize
+      const zoom = typeof window !== "undefined"
+        ? parseFloat(getComputedStyle(document.body).zoom) || 1
+        : 1
+      const usableW = state.screenDimensions.width / zoom
+      const usableH = state.screenDimensions.height / zoom
+      const finalSize = {
+        width: Math.min(requestedSize.width, Math.floor(usableW - 16)),
+        height: Math.min(
+          requestedSize.height,
+          Math.floor(usableH - NAVBAR_HEIGHT - 16),
+        ),
+      }
+
+      // Clamp position so the whole window fits on-screen at open time.
+      // (Mid-drag clamping in OptimizedWindow allows windows to be parked
+      // partially off-screen — that's the legacy Win98 feel — but the
+      // INITIAL position should always fit comfortably.)
+      const clampedPosition = {
+        x: Math.max(
+          0,
+          Math.min(defaultPosition.x, Math.floor(usableW - finalSize.width - 8)),
+        ),
+        y: Math.max(
+          0,
+          Math.min(
+            defaultPosition.y,
+            Math.floor(usableH - finalSize.height - NAVBAR_HEIGHT),
+          ),
+        ),
+      }
+
       const newWindow: WindowEntity = {
         id,
         title,
@@ -207,8 +245,8 @@ const windowSlice = createSlice({
         isOpen: true,
         isMinimized: false,
         isFullscreen: false,
-        position: defaultPosition,
-        size: size || defaultSize,
+        position: clampedPosition,
+        size: finalSize,
         zIndex: ++state.maxZIndex,
         noScroll,
         lastFocused: Date.now()
@@ -373,9 +411,35 @@ const windowSlice = createSlice({
     }>) => {
       state.screenDimensions = action.payload
       const width = action.payload.width
+      const height = action.payload.height
       state.isMobile = width < 768
       state.isSmallDesktop = width >= 768 && width < 1150
       state.isMediumDesktop = width >= 1150 && width < 1400
+
+      // Re-clamp every window's position into the new viewport so a window
+      // dragged near an edge isn't stranded off-screen after a resize. Keep
+      // ≥100 px of the title bar reachable. Fullscreen windows track the
+      // viewport size directly.
+      const MIN_VISIBLE_TITLE_PX = 100
+      const TITLE_BAR_HEIGHT = 30
+      const NAVBAR_HEIGHT = 32
+      for (const id of state.ids) {
+        const w = state.entities[id]
+        if (!w) continue
+        if (w.isFullscreen) {
+          w.position = { x: 0, y: 0 }
+          w.size = { width, height: height - NAVBAR_HEIGHT }
+          continue
+        }
+        const ww = w.size?.width ?? 300
+        const minX = -(ww - MIN_VISIBLE_TITLE_PX)
+        const maxX = width - MIN_VISIBLE_TITLE_PX
+        const maxY = height - TITLE_BAR_HEIGHT
+        w.position = {
+          x: Math.max(minX, Math.min(w.position.x, maxX)),
+          y: Math.max(0, Math.min(w.position.y, maxY)),
+        }
+      }
     }
   }
 })

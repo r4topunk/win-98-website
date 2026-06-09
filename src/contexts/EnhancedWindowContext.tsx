@@ -21,7 +21,7 @@ import {
   updateScreenDimensions as updateScreenDimensionsAction,
 } from '../store/windowSlice'
 import {
-  selectVisibleWindows,
+  selectRenderableWindows,
   selectActiveWindowId,
 } from '../store/selectors'
 
@@ -62,12 +62,16 @@ const WindowContext = createContext<WindowContextType | undefined>(undefined)
 function WindowContextProvider({ children }: { children: ReactNode }) {
   const dispatch = useAppDispatch()
   
-  // Use memoized selectors to prevent unnecessary re-renders
-  const visibleWindows = useAppSelector(selectVisibleWindows)
+  // Use memoized selectors to prevent unnecessary re-renders.
+  // We use the "renderable" set (open, including minimized) so lookups by id
+  // (e.g. the image viewer reading its own window state) work after a
+  // minimize. Consumers that want only on-screen windows filter on
+  // `!w.isMinimized` themselves (the navbar/taskbar already does this).
+  const visibleWindows = useAppSelector(selectRenderableWindows)
   const activeWindowId = useAppSelector(selectActiveWindowId)
-  
+
   // Convert Redux entities to legacy Window format
-  const windows = useMemo(() => 
+  const windows = useMemo(() =>
     visibleWindows.map((window): Window => ({
       id: window.id,
       title: window.title,

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import type { ImageGallery } from "../../lib/types"
 import { cn } from "../../utils/cn"
 import { useWindowContext } from "../../contexts/EnhancedWindowContext"
@@ -16,10 +16,12 @@ export function ImageGalleryViewer({
   className,
   windowId,
 }: ImageGalleryViewerProps) {
-  const { windows, openWindow } = useWindowContext()
+  const { windows, activeWindowId, openWindow } = useWindowContext()
   const [currentIndex, setCurrentIndex] = useState(currentImageIndex)
   const [imageLoading, setImageLoading] = useState(true)
   const [isMobile, setIsMobile] = useState(false)
+  const touchStartXRef = useRef<number | null>(null)
+  const touchStartYRef = useRef<number | null>(null)
 
   // Check if mobile
   useEffect(() => {
@@ -32,9 +34,14 @@ export function ImageGalleryViewer({
   // Find the current window to check if it's fullscreen
   const currentWindow = windowId ? windows.find(w => w.id === windowId) : null
   const isFullscreen = currentWindow?.isFullscreen || false
+  // Only this viewer's keyboard listener should fire when its window is on
+  // top. Without this gate, every open viewer plus the admin form steal
+  // ArrowLeft/Right keys from the focused input.
+  const isActiveWindow = windowId ? activeWindowId === windowId : true
 
   const currentImage = gallery.images[currentIndex]
   const totalImages = gallery.images.length
+  const hasMultiple = totalImages > 1
 
   // Navigate to previous image
   const goToPrevious = () => {
@@ -48,9 +55,24 @@ export function ImageGalleryViewer({
     setCurrentIndex((prev) => (prev < totalImages - 1 ? prev + 1 : 0))
   }
 
-  // Keyboard navigation
+  // Keyboard navigation — scoped to the active window so a viewer hidden
+  // behind admin / another window doesn't hijack arrow keys.
   useEffect(() => {
+    if (!isActiveWindow) return
     const handleKeyDown = (event: KeyboardEvent) => {
+      // Don't steal keys from focused form fields anywhere on the page.
+      const t = event.target as HTMLElement | null
+      if (t) {
+        const tag = t.tagName
+        if (
+          tag === "INPUT" ||
+          tag === "TEXTAREA" ||
+          tag === "SELECT" ||
+          (t as HTMLElement).isContentEditable
+        ) {
+          return
+        }
+      }
       switch (event.key) {
         case "ArrowLeft":
           event.preventDefault()
@@ -77,7 +99,31 @@ export function ImageGalleryViewer({
 
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [totalImages])
+  }, [totalImages, isActiveWindow])
+
+  // Touch swipe: dominant horizontal motion (>40 px, >2× the vertical) flips
+  // the page. Lets a phone visitor leaf through a gallery without on-screen
+  // chevrons; the chevrons stay as the discoverable fallback.
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    const t = e.changedTouches[0]
+    if (!t) return
+    touchStartXRef.current = t.clientX
+    touchStartYRef.current = t.clientY
+  }
+  const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
+    const startX = touchStartXRef.current
+    const startY = touchStartYRef.current
+    touchStartXRef.current = null
+    touchStartYRef.current = null
+    if (startX == null || startY == null) return
+    const t = e.changedTouches[0]
+    if (!t) return
+    const dx = t.clientX - startX
+    const dy = t.clientY - startY
+    if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 2) return
+    if (dx < 0) goToNext()
+    else goToPrevious()
+  }
 
   const handleImageLoad = () => {
     setImageLoading(false)
@@ -140,7 +186,9 @@ export function ImageGalleryViewer({
       }
       
       openWindow({
-        id: `youtube-${youtubeId}-${Date.now()}`,
+        // Stable id per video so clicking "Watch video" a second time focuses
+        // the existing window instead of spawning a duplicate.
+        id: `youtube-${youtubeId}`,
         title: `YouTube - ${currentImage.title || 'Video'}`,
         content: (
           <div className="w-full h-full">
@@ -171,18 +219,31 @@ export function ImageGalleryViewer({
     )
   }
 
+  // The viewer is opened with noScroll: true, which renders the window's
+  // inner container at height: auto. flex-1 inside an auto-height parent
+  // collapses to 0, so we set an explicit pixel height from the window's
+  // own size (minus title bar). Fullscreen uses 100% because OptimizedWindow
+  // already gives the noScroll container `calc(100% - 30px)`.
+  const viewerHeight = isFullscreen
+    ? "100%"
+    : currentWindow?.size?.height
+      ? `${currentWindow.size.height - 30}px`
+      : undefined
+
   return (
     <div
       className={cn(
-        "image-gallery-viewer bg-gray-100 flex justify-center",
-        isFullscreen ? "items-center w-full h-full" : "",
+        "image-gallery-viewer bg-gray-100 flex flex-col w-full overflow-hidden",
         className
       )}
+      style={{ height: viewerHeight }}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
     >
       {/* Main Image Display */}
       <div className={cn(
-        "relative",
-        isFullscreen ? "flex justify-center items-center w-full h-full" : "w-full h-full flex justify-center items-center"
+        "relative flex-1 min-h-0",
+        isFullscreen ? "flex justify-center items-center w-full" : "w-full flex justify-center items-center"
       )}>
         {imageLoading && (
           <div className={cn(
@@ -190,7 +251,7 @@ export function ImageGalleryViewer({
             !isFullscreen && "min-w-[200px] min-h-[150px]"
           )}>
             <p className="text-sm font-['Pixelated MS Sans Serif']">
-              Loading...
+              Carregando…
             </p>
           </div>
         )}
@@ -214,10 +275,10 @@ export function ImageGalleryViewer({
         {/* Spotify button for images with Spotify links */}
         {currentImage.link && currentImage.link.includes('spotify.com') && !imageLoading && (
           <button
-            className="absolute bottom-2 left-2 right-2 bg-green-500 hover:bg-green-600 text-white text-sm py-2 px-4 font-['Pixelated MS Sans Serif'] border border-green-700 transition-colors duration-200"
+            className="absolute bottom-10 left-2 right-2 bg-green-500 hover:bg-green-600 text-white text-sm py-2 px-4 font-['Pixelated MS Sans Serif'] border border-green-700 transition-colors duration-200"
             onClick={() => window.open(currentImage.link, '_blank')}
           >
-            View on Spotify
+            Abrir no Spotify
           </button>
         )}
 
@@ -227,20 +288,54 @@ export function ImageGalleryViewer({
             className="absolute top-2 left-2 right-2 bg-red-600 hover:bg-red-700 text-white text-sm py-2 px-4 font-['Pixelated MS Sans Serif'] border border-red-800 transition-colors duration-200"
             onClick={handleYouTubeClick}
           >
-Watch video
+            Assistir vídeo
           </button>
         )}
 
-        {/* Pix button - only shows in pix viewer */}
+        {/* Pix viewer is decorative — render a non-interactive label so Tab
+            users don't land on a button that does nothing. */}
         {windowId === 'pix-viewer' && !imageLoading && (
-          <button
-            className="absolute top-2 left-2 right-2 bg-blue-600 hover:bg-blue-700 text-white text-sm py-2 px-4 font-['Pixelated MS Sans Serif'] border border-blue-800 transition-colors duration-200"
-            onClick={() => {}}
+          <div
+            className="absolute top-2 left-2 right-2 bg-blue-600 text-white text-sm py-2 px-4 font-['Pixelated MS Sans Serif'] border border-blue-800 text-center"
+            aria-hidden="true"
           >
             me paga um almoço aí jjjkkkkk
-          </button>
+          </div>
         )}
       </div>
+
+      {/* Win98-style status bar: prev / counter / next. Hidden for
+          single-image viewers (Pix, Desenhe, Error) where it would just
+          show "1/1". */}
+      {hasMultiple && (
+        <div
+          className="status-bar flex items-stretch select-none"
+          style={{ borderTop: "1px solid #808080", boxShadow: "inset 0 1px #fff" }}
+        >
+          <button
+            type="button"
+            onClick={goToPrevious}
+            aria-label="Imagem anterior"
+            className="px-3 py-0.5 text-sm font-['Pixelated MS Sans Serif']"
+            title="Anterior (←)"
+          >
+            ‹
+          </button>
+          <div className="flex-1 status-bar-field text-center font-['Pixelated MS Sans Serif']">
+            {currentIndex + 1} / {totalImages}
+            {currentImage.title ? ` · ${currentImage.title}` : ""}
+          </div>
+          <button
+            type="button"
+            onClick={goToNext}
+            aria-label="Próxima imagem"
+            className="px-3 py-0.5 text-sm font-['Pixelated MS Sans Serif']"
+            title="Próxima (→)"
+          >
+            ›
+          </button>
+        </div>
+      )}
     </div>
   )
 }

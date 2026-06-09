@@ -27,6 +27,12 @@ export interface GalleryImage {
   alt: string
   title?: string
   link?: string
+  // Intrinsic image dimensions — when present we open the viewer window at
+  // an aspect-correct size (no letterboxing). Optional because legacy
+  // bundled samples don't carry them, and we have a runtime fallback that
+  // captures naturalWidth/naturalHeight from the grid thumbnail load.
+  width?: number
+  height?: number
   // Extras for admin (not used by public viewer):
   id?: string
   storagePath?: string
