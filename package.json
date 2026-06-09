@@ -12,6 +12,7 @@
     "seed:db": "tsx scripts/seed-db.ts",
     "seed": "pnpm seed:storage && pnpm seed:db",
     "admin:link": "tsx scripts/admin-magic-link.ts",
+    "admin:password": "tsx scripts/set-admin-password.ts",
     "admin:diag": "tsx scripts/diag-auth.ts",
     "thumbs": "tsx scripts/gen-thumbs.ts",
     "thumbs:backfill": "tsx scripts/backfill-thumbs.ts"

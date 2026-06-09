@@ -32,8 +32,9 @@ export function AdminApp() {
     isSupabaseConfigured ? { kind: "loading" } : { kind: "anon" },
   )
   const [email, setEmail] = useState("")
-  const [sendingLink, setSendingLink] = useState(false)
-  const [linkMessage, setLinkMessage] = useState<string | null>(null)
+  const [password, setPassword] = useState("")
+  const [signingIn, setSigningIn] = useState(false)
+  const [signInError, setSignInError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!isSupabaseConfigured) return
@@ -65,16 +66,22 @@ export function AdminApp() {
     )
   }
 
-  async function sendLink(e: React.FormEvent) {
+  async function signIn(e: React.FormEvent) {
     e.preventDefault()
-    setLinkMessage(null)
-    setSendingLink(true)
-    const { error } = await supabase.auth.signInWithOtp({
+    setSignInError(null)
+    setSigningIn(true)
+    const { error } = await supabase.auth.signInWithPassword({
       email: email.trim(),
-      options: { emailRedirectTo: `${window.location.origin}/admin` },
+      password,
     })
-    setSendingLink(false)
-    setLinkMessage(error ? `Error: ${error.message}` : "Magic link sent. Check your email.")
+    setSigningIn(false)
+    if (error) {
+      // Don't reveal whether the email exists — same message for "no user"
+      // and "wrong password".
+      setSignInError("Invalid email or password.")
+      setPassword("")
+    }
+    // On success, onAuthStateChange fires and re-renders into signed-in.
   }
 
   async function signOut() {
@@ -89,25 +96,37 @@ export function AdminApp() {
     return (
       <div className="p-3 flex flex-col gap-2">
         <p className="font-bold">Admin login</p>
-        <form onSubmit={sendLink} className="flex flex-col gap-2">
+        <form onSubmit={signIn} className="flex flex-col gap-2">
           <div className="field-row-stacked">
             <label htmlFor="admin-email">Email</label>
             <input
               id="admin-email"
               type="email"
               required
+              autoComplete="username"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
             />
           </div>
+          <div className="field-row-stacked">
+            <label htmlFor="admin-password">Password</label>
+            <input
+              id="admin-password"
+              type="password"
+              required
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
           <div className="field-row">
-            <button type="submit" disabled={sendingLink || !email.trim()}>
-              {sendingLink ? "Sending..." : "Send magic link"}
+            <button type="submit" disabled={signingIn || !email.trim() || !password}>
+              {signingIn ? "Signing in..." : "Sign in"}
             </button>
           </div>
         </form>
-        {linkMessage && <p className="text-xs">{linkMessage}</p>}
+        {signInError && <p className="text-xs">{signInError}</p>}
       </div>
     )
   }
