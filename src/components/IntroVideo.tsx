@@ -8,10 +8,14 @@ export const IntroVideo = ({ onComplete }: IntroVideoProps) => {
   const [error, setError] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  // If the video fails to load (missing /intro.webm, codec issue, network
+  // error), don't trap the visitor on a black screen — auto-advance past the
+  // intro after 1.5 s so the desktop is reachable.
   useEffect(() => {
-    const now = new Date().getTime();
-    localStorage.setItem('introLastShown', now.toString());
-  }, []);
+    if (!error) return;
+    const timeout = setTimeout(onComplete, 1500);
+    return () => clearTimeout(timeout);
+  }, [error, onComplete]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -73,8 +77,9 @@ export const IntroVideo = ({ onComplete }: IntroVideoProps) => {
     <div className="fixed inset-0 z-50 bg-black flex items-center justify-center">
       <div className="w-full h-full max-w-full max-h-full flex items-center justify-center relative">
         {error && (
-          <div className="absolute inset-0 flex items-center justify-center text-white">
-            <p>Failed to load video. Please try again.</p>
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-white gap-2 text-center px-6">
+            <p>Falha ao carregar o vídeo.</p>
+            <p className="text-sm opacity-80">Abrindo a área de trabalho…</p>
           </div>
         )}
 
@@ -108,9 +113,11 @@ export const IntroVideo = ({ onComplete }: IntroVideoProps) => {
 
         <button
           onClick={onComplete}
-          className="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-white/20 hover:bg-white/30 text-white px-6 py-2 rounded-full backdrop-blur-sm transition-all z-[52]"
+          aria-label="Skip intro"
+          // bottom-12 keeps the button clear of iOS Safari's home-bar overlay
+          className="fixed bottom-12 left-1/2 transform -translate-x-1/2 bg-white/20 hover:bg-white/30 text-white px-6 py-2 rounded-full backdrop-blur-sm transition-all z-[52]"
         >
-          Pular
+          Pular · Skip · スキップ
         </button>
       </div>
     </div>

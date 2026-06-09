@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import type { Session } from "@supabase/supabase-js"
-import { isSupabaseConfigured, supabase } from "../../lib/supabase"
+import { isAdminDevPreview, isSupabaseConfigured, supabase } from "../../lib/supabase"
 import { AdminPanel } from "./AdminPanel"
 
 type AuthState =
@@ -53,7 +53,7 @@ export function AdminApp() {
     return () => sub.subscription.unsubscribe()
   }, [])
 
-  if (!isSupabaseConfigured) {
+  if (!isSupabaseConfigured && !isAdminDevPreview) {
     return (
       <div className="p-3 flex flex-col gap-2">
         <p className="font-bold">Admin unavailable</p>
@@ -62,6 +62,33 @@ export function AdminApp() {
           <code>VITE_SUPABASE_PUBLISHABLE_KEY</code> in <code>.env.local</code>{" "}
           to enable the admin panel.
         </p>
+      </div>
+    )
+  }
+
+  // Dev preview: skip auth entirely, render AdminPanel with stubbed data so
+  // the layout is inspectable. Only kicks in when `import.meta.env.DEV &&
+  // !isSupabaseConfigured` — production builds without env vars still show
+  // "Admin unavailable" instead of a fake authenticated panel.
+  if (isAdminDevPreview) {
+    return (
+      <div className="flex flex-col h-full">
+        <div
+          role="status"
+          className="text-xs px-2 py-1 border-b border-[#808080] bg-[#ffffe1]"
+        >
+          Dev preview — sem autenticação, sem persistência. Configure
+          Supabase para usar de verdade.
+        </div>
+        <div className="flex-1 min-h-0">
+          <AdminPanel
+            email="dev@local"
+            onSignOut={() => {
+              // No-op in dev preview; nothing to sign out of.
+              window.location.reload()
+            }}
+          />
+        </div>
       </div>
     )
   }

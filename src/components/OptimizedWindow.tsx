@@ -76,6 +76,25 @@ const OptimizedWindow = memo(({ windowId }: OptimizedWindowProps) => {
     isResizingRef.current = isResizing
   }, [isResizing])
 
+  // Touch devices have no precise resize handles and no min/max buttons big
+  // enough to hit reliably. Auto-maximize newly opened windows on coarse
+  // pointers so the user gets a single-window phone experience instead.
+  // Guarded by a ref so a later non-fullscreen state (user un-maximized on
+  // purpose) isn't undone by a re-render.
+  const didAutoMaximizeRef = useRef(false)
+  useEffect(() => {
+    if (didAutoMaximizeRef.current) return
+    if (typeof globalThis === "undefined" || !globalThis.matchMedia) return
+    if (!globalThis.matchMedia("(pointer: coarse)").matches) return
+    if (!window || window.isFullscreen) {
+      didAutoMaximizeRef.current = true
+      return
+    }
+    didAutoMaximizeRef.current = true
+    dispatch(maximizeWindow(windowId))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [windowId, dispatch])
+
   // Get zoom level from document body
   const getZoomLevel = useCallback(() => {
     return parseFloat(getComputedStyle(document.body).zoom) || 1
@@ -164,12 +183,20 @@ const OptimizedWindow = memo(({ windowId }: OptimizedWindowProps) => {
 
         if (containerRect && windowRef.current) {
           const windowWidth = windowRef.current.offsetWidth
+          // Keep ≥100 px of the title bar inside the viewport so the user can
+          // always grab and drag the window back. Old constraint allowed
+          // dragging 75% off-screen and stranding the window.
+          const MIN_VISIBLE_TITLE_PX = 100
+          const TITLE_BAR_HEIGHT = 30
 
           constrainedX = Math.max(
-            -(windowWidth * 0.75),
-            Math.min(constrainedX, containerRect.width / zoom - windowWidth * 0.25)
+            -(windowWidth - MIN_VISIBLE_TITLE_PX),
+            Math.min(constrainedX, containerRect.width / zoom - MIN_VISIBLE_TITLE_PX)
           )
-          constrainedY = Math.max(0, Math.min(constrainedY, containerRect.height / zoom - 50))
+          constrainedY = Math.max(
+            0,
+            Math.min(constrainedY, containerRect.height / zoom - TITLE_BAR_HEIGHT)
+          )
         }
 
         dispatch(updateWindowPosition({
@@ -262,11 +289,17 @@ const OptimizedWindow = memo(({ windowId }: OptimizedWindowProps) => {
 
         if (containerRect && windowRef.current) {
           const windowWidth = windowRef.current.offsetWidth
+          // Same ≥100 px title-bar clamp as the mouse path above.
+          const MIN_VISIBLE_TITLE_PX = 100
+          const TITLE_BAR_HEIGHT = 30
           constrainedX = Math.max(
-            -(windowWidth * 0.75),
-            Math.min(constrainedX, containerRect.width / zoom - windowWidth * 0.25)
+            -(windowWidth - MIN_VISIBLE_TITLE_PX),
+            Math.min(constrainedX, containerRect.width / zoom - MIN_VISIBLE_TITLE_PX)
           )
-          constrainedY = Math.max(0, Math.min(constrainedY, containerRect.height / zoom - 50))
+          constrainedY = Math.max(
+            0,
+            Math.min(constrainedY, containerRect.height / zoom - TITLE_BAR_HEIGHT)
+          )
         }
 
         dispatch(updateWindowPosition({
@@ -351,6 +384,11 @@ const OptimizedWindow = memo(({ windowId }: OptimizedWindowProps) => {
       maxHeight: window.isFullscreen ? "100%" : "calc(100% - 30px)",
       zIndex: isDragging || isResizing ? 9999 : window.zIndex || 10,
       transform: isDragging || isResizing ? "translateZ(0)" : "none", // GPU acceleration
+      // Keep the DOM mounted while minimized so embedded media (YouTube /
+      // Spotify iframes) and in-window state (scroll, form text) survive a
+      // restore. selectRenderableWindows includes minimized windows for this
+      // exact reason.
+      display: window.isMinimized ? "none" : undefined,
     }
   }, [
     window?.position.x,
@@ -360,6 +398,7 @@ const OptimizedWindow = memo(({ windowId }: OptimizedWindowProps) => {
     window?.noScroll,
     window?.isFullscreen,
     window?.zIndex,
+    window?.isMinimized,
     isDragging,
     isResizing,
   ])
@@ -369,14 +408,14 @@ const OptimizedWindow = memo(({ windowId }: OptimizedWindowProps) => {
   return (
     <div
       ref={windowRef}
-      className="window absolute shadow-md"
+      className="window absolute"
       style={windowStyle}
       onMouseDown={handleRootMouseDown}
       onTouchStart={handleRootTouchStart}
     >
       <div className="title-bar cursor-move">
         <div className="title-bar-text">{window.title}</div>
-        <div className="title-bar-controls">
+        <div className="title-bar-controls touch-controls">
           <button aria-label="Minimize" onClick={handleMinimize} />
           <button aria-label="Maximize" onClick={handleMaximize} />
           <button aria-label="Close" onClick={handleClose} />
@@ -418,39 +457,43 @@ const OptimizedWindow = memo(({ windowId }: OptimizedWindowProps) => {
           </div>
         )}
 
-        {/* Resize handles */}
-        <div
-          className="absolute top-0 right-0 w-2 h-2 cursor-ne-resize"
-          onMouseDown={(e) => handleResizeMouseDown(e, "top-right")}
-        />
-        <div
-          className="absolute top-0 left-0 w-2 h-2 cursor-nw-resize"
-          onMouseDown={(e) => handleResizeMouseDown(e, "top-left")}
-        />
-        <div
-          className="absolute bottom-0 right-0 w-2 h-2 cursor-se-resize"
-          onMouseDown={(e) => handleResizeMouseDown(e, "bottom-right")}
-        />
-        <div
-          className="absolute bottom-0 left-0 w-2 h-2 cursor-sw-resize"
-          onMouseDown={(e) => handleResizeMouseDown(e, "bottom-left")}
-        />
-        <div
-          className="absolute top-0 left-2 right-2 h-1 cursor-n-resize"
-          onMouseDown={(e) => handleResizeMouseDown(e, "top")}
-        />
-        <div
-          className="absolute bottom-0 left-2 right-2 h-1 cursor-s-resize"
-          onMouseDown={(e) => handleResizeMouseDown(e, "bottom")}
-        />
-        <div
-          className="absolute left-0 top-2 bottom-2 w-1 cursor-w-resize"
-          onMouseDown={(e) => handleResizeMouseDown(e, "left")}
-        />
-        <div
-          className="absolute right-0 top-2 bottom-2 w-1 cursor-e-resize"
-          onMouseDown={(e) => handleResizeMouseDown(e, "right")}
-        />
+        {/* Resize handles — hidden on coarse-pointer devices via CSS
+            (.window-resize-handles in app.css) because they're 4-8 px and
+            unusable with a finger anyway. */}
+        <div className="window-resize-handles">
+          <div
+            className="absolute top-0 right-0 w-2 h-2 cursor-ne-resize"
+            onMouseDown={(e) => handleResizeMouseDown(e, "top-right")}
+          />
+          <div
+            className="absolute top-0 left-0 w-2 h-2 cursor-nw-resize"
+            onMouseDown={(e) => handleResizeMouseDown(e, "top-left")}
+          />
+          <div
+            className="absolute bottom-0 right-0 w-2 h-2 cursor-se-resize"
+            onMouseDown={(e) => handleResizeMouseDown(e, "bottom-right")}
+          />
+          <div
+            className="absolute bottom-0 left-0 w-2 h-2 cursor-sw-resize"
+            onMouseDown={(e) => handleResizeMouseDown(e, "bottom-left")}
+          />
+          <div
+            className="absolute top-0 left-2 right-2 h-1 cursor-n-resize"
+            onMouseDown={(e) => handleResizeMouseDown(e, "top")}
+          />
+          <div
+            className="absolute bottom-0 left-2 right-2 h-1 cursor-s-resize"
+            onMouseDown={(e) => handleResizeMouseDown(e, "bottom")}
+          />
+          <div
+            className="absolute left-0 top-2 bottom-2 w-1 cursor-w-resize"
+            onMouseDown={(e) => handleResizeMouseDown(e, "left")}
+          />
+          <div
+            className="absolute right-0 top-2 bottom-2 w-1 cursor-e-resize"
+            onMouseDown={(e) => handleResizeMouseDown(e, "right")}
+          />
+        </div>
       </div>
     </div>
   )

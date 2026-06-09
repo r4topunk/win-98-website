@@ -199,7 +199,7 @@ export function DesktopIcon({ icon_path, icon_name }: DesktopIconProps) {
   return (
     <button
       onClick={handleIconClick}
-      className="flex flex-col gap-1 items-center justify-center p-2! bg-transparent! shadow-none! cursor-pointer w-full"
+      className="desktop-icon-btn flex flex-col gap-1 items-center justify-center p-2! bg-transparent! shadow-none! cursor-pointer w-full"
     >
       <img
         src={icon_path}
@@ -207,7 +207,14 @@ export function DesktopIcon({ icon_path, icon_name }: DesktopIconProps) {
         width={iconSize}
         className="pointer-events-none"
       />
-      <p className="font-['Pixelated MS Sans Serif'] text-white font-light!">
+      {/* Inline style — Tailwind 4's arbitrary [text-shadow:...] arbitrary
+          syntax was rendering doubled/ghosted at hi-DPI + body zoom 1.25.
+          A plain inline style keeps the readable-on-wallpaper drop shadow
+          without the rendering glitch. */}
+      <p
+        style={{ textShadow: "0 1px 2px rgba(0,0,0,0.9)" }}
+        className="font-['Pixelated MS Sans Serif'] text-white font-light!"
+      >
         {icon_name}
       </p>
     </button>

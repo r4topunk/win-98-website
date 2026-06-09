@@ -55,8 +55,49 @@
 /* Reduce motion for users who prefer it */
 @media (prefers-reduced-motion: reduce) {
   .animate-scan,
-  .animate-fade {
+  .animate-fade,
+  .animate-flicker {
     animation: none;
+  }
+}
+
+/* Restore keyboard focus rings — but only for keyboard users.
+   - Kill 98.css's `button:focus` outline (it fires on mouse click too,
+     and was leaving a dashed box around every icon the user clicked).
+   - Add a discrete `:focus-visible` rule that only browsers consider
+     visible during keyboard navigation. */
+button:focus {
+  outline: none;
+}
+:focus-visible {
+  outline: 1px dotted #000;
+  outline-offset: 1px;
+}
+/* Desktop icons live on the wallpaper — black outline is invisible there.
+   Use a Win98-style white dotted ring drawn INSIDE the button (offset -2)
+   so it doesn't break the icon grid spacing. */
+.desktop-icon-btn:focus-visible {
+  outline: 1px dotted #ffffff;
+  outline-offset: -2px;
+}
+
+/* Touch-device adaptations:
+   - Windows auto-maximize on first open (see OptimizedWindow), so resize
+     handles are dead surface and we hide them.
+   - The Win98 close/min/max buttons render at ~16×14 px, well under the
+     WCAG 2.5.8 24×24 minimum. Expand the tap target via ::before without
+     changing the visible button size. */
+@media (pointer: coarse) {
+  .window-resize-handles {
+    display: none;
+  }
+  .title-bar-controls.touch-controls button {
+    position: relative;
+  }
+  .title-bar-controls.touch-controls button::before {
+    content: "";
+    position: absolute;
+    inset: -8px -6px;
   }
 }
 
