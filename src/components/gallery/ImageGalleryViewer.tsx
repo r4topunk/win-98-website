@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react"
 import type { ImageGallery } from "../../lib/types"
 import { cn } from "../../utils/cn"
 import { useWindowContext } from "../../contexts/EnhancedWindowContext"
+import { openExternal } from "../../lib/safeUrl"
 
 interface ImageGalleryViewerProps {
   gallery: ImageGallery
@@ -206,8 +207,8 @@ export function ImageGalleryViewer({
 
       // Keep current image window open - no need to duplicate as it's already open
     } else {
-      // Fallback: open original YouTube link
-      window.open(currentImage.link, '_blank')
+      // Fallback: open original YouTube link (scheme-validated)
+      openExternal(currentImage.link)
     }
   }
 
@@ -276,7 +277,7 @@ export function ImageGalleryViewer({
         {currentImage.link && currentImage.link.includes('spotify.com') && !imageLoading && (
           <button
             className="absolute bottom-10 left-2 right-2 bg-green-500 hover:bg-green-600 text-white text-sm py-2 px-4 font-['Pixelated MS Sans Serif'] border border-green-700 transition-colors duration-200"
-            onClick={() => window.open(currentImage.link, '_blank')}
+            onClick={() => openExternal(currentImage.link)}
           >
             Abrir no Spotify
           </button>

@@ -8,6 +8,7 @@ import {
   type GalleryTypeConfig,
 } from "../../lib/galleryTypes"
 import { generateThumbBlob, thumbStoragePath } from "../../lib/imageThumb"
+import { DrawingsAdmin } from "./DrawingsAdmin"
 
 interface Props {
   email: string
@@ -209,8 +210,9 @@ export function AdminPanel({ email, onSignOut }: Props) {
         </p>
       )}
 
-      {/* Body: two-column on wide screens */}
-      <div className="flex-1 overflow-auto p-2 grid gap-2 grid-cols-[minmax(0,1fr)] lg:grid-cols-[minmax(280px,360px)_minmax(0,1fr)] lg:items-start">
+      {/* Body: galleries (two-column on wide screens) + drawings moderation */}
+      <div className="flex-1 overflow-auto p-2 flex flex-col gap-3">
+      <div className="grid gap-2 grid-cols-[minmax(0,1fr)] lg:grid-cols-[minmax(280px,360px)_minmax(0,1fr)] lg:items-start">
         {/* Left column: gallery + add form (sticky on lg) */}
         <div className="flex flex-col gap-2 min-w-0 lg:sticky lg:top-0">
           <fieldset>
@@ -286,6 +288,9 @@ export function AdminPanel({ email, onSignOut }: Props) {
             </div>
           </fieldset>
         )}
+      </div>
+
+      <DrawingsAdmin />
       </div>
 
       {/* Status bar */}
@@ -482,6 +487,7 @@ function ImageRowEditor({
         )}
         <p className="text-[10px] text-gray-600 break-all">
           {img.storage_path} · order {img.sort_order}
+          {img.hidden && <span style={{ color: "#a00000" }}> · hidden</span>}
         </p>
         <div className="field-row">
           <button
@@ -496,8 +502,24 @@ function ImageRowEditor({
           >
             Save
           </button>
+          <button
+            onClick={() => onUpdate({ hidden: !img.hidden })}
+            title={
+              img.hidden
+                ? "Show in the public gallery"
+                : "Hide from the public gallery (does NOT delete the file)"
+            }
+          >
+            {img.hidden ? "Unhide" : "Hide"}
+          </button>
           <button onClick={onDelete}>Delete</button>
         </div>
+        {img.hidden && (
+          <p className="text-[10px]" style={{ color: "#444" }}>
+            Hidden from the public site. The stored file URL is still public —
+            use Delete to take it down completely.
+          </p>
+        )}
       </div>
       <div className="admin-reorder">
         <button

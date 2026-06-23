@@ -10,7 +10,14 @@ import { IntroVideo } from "./components/IntroVideo"
 import { VintageTransition } from "./components/VintageTransition"
 import { CRTEffect } from "./components/CRTEffect"
 import { WindowContents } from "./components/WindowContents"
+import { paintWindowSize } from "./lib/paintWindow"
 import { playClick } from "./services/sound"
+
+// Per-window-id overrides so deep-link / Start-menu opens match the compact
+// sizing the desktop icon uses. (Most windows are fine at the default size.)
+function sizeForWindowId(windowId: string): { width: number; height: number } | undefined {
+  return windowId === "desenhe" ? paintWindowSize() : undefined
+}
 
 // Shareable per-window deep links. URL hash is the source of truth for
 // "what window should be open" — visiting #movies opens the Movies window,
@@ -60,6 +67,7 @@ function HashRouter() {
       id: route.windowId,
       title: route.iconName,
       content: <WindowContents iconType={route.iconName} />,
+      size: sizeForWindowId(route.windowId),
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -99,6 +107,7 @@ function HashRouter() {
           id: route.windowId,
           title: route.iconName,
           content: <WindowContents iconType={route.iconName} />,
+          size: sizeForWindowId(route.windowId),
         })
       }
     }
@@ -166,6 +175,7 @@ function StartMenu({ onClose }: { onClose: () => void }) {
       id: iconName.toLowerCase().replace(/\s/g, "-"),
       title: iconName,
       content: <WindowContents iconType={iconName} />,
+      size: sizeForWindowId(iconName.toLowerCase().replace(/\s/g, "-")),
     })
     onClose()
   }

@@ -148,3 +148,143 @@ create policy "site_images_admin_write" on storage.objects
     bucket_id = 'site-images'
     and exists (select 1 from public.admins a where a.email = auth.email())
   );
+
+-- ============================================================
+-- DRAWINGS (anonymous pixel-art mural)
+-- Visitors with NO login submit a tiny base64 PNG + name + message;
+-- the public reads only visible rows; admins (admins-table membership)
+-- hide/delete anything. All anon writes are confined to this one table
+-- and bounded by RLS + table-level CHECK constraints + throttle triggers.
+-- The pixel art is stored INLINE as raw base64 (no "data:" prefix, no
+-- Storage upload), so the anon role never gets write access to the
+-- public site-images bucket.
+-- ============================================================
+
+create table if not exists public.drawings (
+  id          uuid primary key default gen_random_uuid(),
+  author_name text not null,
+  message     text not null default '',
+  png_data    text not null,                 -- RAW base64 ONLY, no "data:" prefix
+  hidden      boolean not null default false, -- moderation flag (NOT NULL = no limbo)
+  created_at  timestamptz not null default now()
+);
+
+-- Mural list reads non-hidden rows newest-first; this index serves it.
+create index if not exists drawings_visible_idx
+  on public.drawings (hidden, created_at desc);
+
+-- Size/shape guardrails as TABLE-LEVEL CHECK constraints: enforced for every
+-- writer (incl. service_role and any future code path), not only in the policy
+-- WITH CHECK. These are the real DoS/size bounds.
+alter table public.drawings drop constraint if exists drawings_author_len;
+alter table public.drawings add  constraint drawings_author_len
+  check (char_length(btrim(author_name)) between 1 and 40);
+
+alter table public.drawings drop constraint if exists drawings_message_len;
+alter table public.drawings add  constraint drawings_message_len
+  check (char_length(message) <= 280);
+
+-- ~6000 chars comfortably fits a 64x64 limited-palette PNG (typically
+-- 1-2 KB, worst ~3.5 KB as base64) with headroom, while hard-blocking
+-- megabyte blobs pushed through the anon endpoint.
+alter table public.drawings drop constraint if exists drawings_png_len;
+alter table public.drawings add  constraint drawings_png_len
+  check (char_length(png_data) between 100 and 6000);
+
+-- Alphabet sanity only (NOT a content guarantee). Forbidding ':' means a
+-- stored "data:text/html"/"data:image/svg+xml" can never reach an attribute.
+alter table public.drawings drop constraint if exists drawings_png_b64;
+alter table public.drawings add  constraint drawings_png_b64
+  check (png_data ~ '^[A-Za-z0-9+/]+={0,2}$');
+
+-- BLOCKING: RLS must be explicitly enabled, else the anon key has full access.
+alter table public.drawings enable row level security;
+
+-- Column-level grants: anon can physically write ONLY the three user columns,
+-- never hidden/id/created_at. anon gets SELECT (mural) + scoped INSERT only;
+-- no UPDATE/DELETE (so anon cannot edit or remove any row, incl. its own).
+revoke all on public.drawings from anon;
+grant select on public.drawings to anon;
+grant insert (author_name, message, png_data) on public.drawings to anon;
+
+-- Public read: only non-hidden rows. This single predicate is the anon filter.
+-- APPROVAL QUEUE FLIP (if spam ever appears): add a column
+--   alter table public.drawings add column if not exists approved boolean not null default false;
+-- and change the USING below to `using (hidden = false and approved = true)`.
+-- Anon insert still works (approved stays false); admin flips approved=true to publish.
+drop policy if exists "drawings_public_read" on public.drawings;
+create policy "drawings_public_read" on public.drawings
+  for select to anon, authenticated using (hidden = false);
+
+-- Anon insert: pins hidden=false; mirrors the CHECKs for fail-fast feedback.
+drop policy if exists "drawings_anon_insert" on public.drawings;
+create policy "drawings_anon_insert" on public.drawings
+  for insert to anon
+  with check (
+    hidden = false
+    and char_length(btrim(author_name)) between 1 and 40
+    and char_length(message) <= 280
+    and char_length(png_data) between 100 and 6000
+  );
+
+-- Admin: FOR ALL (load-bearing — FOR ALL contributes a USING branch to SELECT,
+-- so an admin OR-combines public_read(hidden=false) with this and sees EVERY
+-- row incl. hidden ones to moderate). Same admins-membership gate as
+-- galleries_admin_write / images_admin_write.
+drop policy if exists "drawings_admin_all" on public.drawings;
+create policy "drawings_admin_all" on public.drawings
+  for all to authenticated
+  using      ( exists (select 1 from public.admins a where a.email = auth.email()) )
+  with check ( exists (select 1 from public.admins a where a.email = auth.email()) );
+
+-- Global insert-rate circuit-breaker. anon has no stable identity, so this is a
+-- COARSE GLOBAL throttle (self-DoS-tolerant: the artist prefers the mural going
+-- briefly read-only over the DB filling). Mirrors the admins_cap_trigger pattern.
+create or replace function public.drawings_rate_limit()
+returns trigger language plpgsql as $$
+begin
+  if (select count(*) from public.drawings
+        where created_at > now() - interval '1 minute') >= 10 then
+    raise exception 'rate limit: too many drawings, try again shortly';
+  end if;
+  return new;
+end;
+$$;
+drop trigger if exists drawings_rate_limit_trg on public.drawings;
+create trigger drawings_rate_limit_trg
+  before insert on public.drawings
+  for each row execute function public.drawings_rate_limit();
+
+-- Hard ceiling so the table can never balloon the DB. Counts non-hidden rows so
+-- moderation (hiding) keeps the mural submittable.
+create or replace function public.drawings_total_cap()
+returns trigger language plpgsql as $$
+begin
+  if (select count(*) from public.drawings where hidden = false) >= 2000 then
+    raise exception 'drawings mural is full';
+  end if;
+  return new;
+end;
+$$;
+drop trigger if exists drawings_total_cap_trg on public.drawings;
+create trigger drawings_total_cap_trg
+  before insert on public.drawings
+  for each row execute function public.drawings_total_cap();
+
+-- ============================================================
+-- GENERALIZED HIDE for gallery images
+-- Lets admins hide ANY content (not just drawings). NOT NULL + default false
+-- backfills existing rows to visible (no row vanishes on migration).
+-- NOTE: hiding removes the row from queries but does NOT revoke the public
+-- Storage object URL (the site-images bucket is public). For genuinely
+-- sensitive/abusive uploads the admin must ALSO delete the storage object.
+-- ============================================================
+
+alter table public.images add column if not exists hidden boolean not null default false;
+
+-- ONLY change vs. the original: public read now filters hidden. The existing
+-- images_admin_write FOR ALL policy already grants admins SELECT, so admins
+-- keep seeing hidden rows via OR-combination — no new admin policy needed.
+drop policy if exists "images_public_read" on public.images;
+create policy "images_public_read" on public.images
+  for select to anon, authenticated using (hidden = false);

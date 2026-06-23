@@ -57,6 +57,7 @@ function devPreviewStub(): SupabaseClient {
         sort_order: i,
         width: null,
         height: null,
+        hidden: false,
         created_at: "",
         updated_at: "",
       })

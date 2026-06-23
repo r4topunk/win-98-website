@@ -2,6 +2,7 @@ import { useState } from "react"
 import { ImageGalleryGrid } from "./gallery/ImageGalleryGrid"
 import { ImageGalleryViewer } from "./gallery/ImageGalleryViewer"
 import { TextNoteViewer } from "./content/TextNoteViewer"
+import { DesenheWindow } from "./paint/DesenheWindow"
 import { useGallery, useGalleries } from "../hooks/useGalleries"
 
 interface WindowContentsProps {
@@ -9,6 +10,8 @@ interface WindowContentsProps {
 }
 
 // Maps desktop icon name -> DB gallery id.
+// "Desenhe" is intentionally absent: it now opens the interactive Paint app
+// (DesenheWindow) instead of a static gallery image.
 const ICON_TO_GALLERY: Record<string, string> = {
   Movies: "movies",
   Images: "images",
@@ -16,13 +19,11 @@ const ICON_TO_GALLERY: Record<string, string> = {
   Customs: "customs",
   "Pelo mundo": "pelo-mundo",
   Rejects: "rejects",
-  Desenhe: "paint",
   "???": "pix",
   Error: "campominado",
 }
 
 const SINGLE_IMAGE_VIEWERS: Record<string, string> = {
-  Desenhe: "desenhe",
   "???": "pix-viewer",
   Error: "campominado-viewer",
 }
@@ -68,6 +69,11 @@ export function WindowContents({ iconType }: WindowContentsProps) {
   const { loading, error, usingFallback, reload } = useGalleries()
   const galleryId = ICON_TO_GALLERY[iconType]
   const gallery = useGallery(galleryId ?? "")
+
+  // Interactive pixel-art Paint app + community mural.
+  if (iconType === "Desenhe") {
+    return <DesenheWindow />
+  }
 
   // Grid galleries
   if (

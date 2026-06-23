@@ -1,5 +1,6 @@
 import { useWindowContext } from "../contexts/EnhancedWindowContext"
 import { WindowContents } from "./WindowContents"
+import { paintWindowSize } from "../lib/paintWindow"
 
 interface DesktopIconProps {
   icon_path: string
@@ -41,32 +42,13 @@ export function DesktopIcon({ icon_path, icon_name }: DesktopIconProps) {
 
     let windowSize
     if (isPaint) {
-      // For paint, calculate window size using the known image dimensions: 1654 × 1486
-      const imageAspectRatio = 1654 / 1486 // ≈ 1.113
-      const paintWidth = isMobile 
-        ? Math.min(350, screenWidth - 20)
-        : isSmallDesktop
-        ? 280
-        : isMediumDesktop
-        ? 500
-        : 500
-      
-      // Calculate height from width using the aspect ratio, then add space for window chrome
-      const imageHeight = paintWidth / imageAspectRatio
-      const windowChromeHeight = 30 // Account for title bar and borders
-      const paintHeight = Math.round(imageHeight + windowChromeHeight)
-      
-      const dynamicWindowSize = { 
-        width: Math.round(paintWidth), 
-        height: paintHeight 
-      }
-      
+      // Paint app: compact window sized to fit the editor (canvas + palette +
+      // tools). Shared helper keeps every open path consistent.
       openWindow({
         id: icon_name.toLowerCase().replace(/\s/g, "-"),
         title: icon_name,
         content: <WindowContents iconType={icon_name} />,
-        size: dynamicWindowSize,
-        noScroll: true,
+        size: paintWindowSize(),
       })
       return
     } else if (isPix) {

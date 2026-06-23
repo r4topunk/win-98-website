@@ -124,3 +124,60 @@ Storage: single bucket `site-images`, public read, private write (secret key onl
 3. `pnpm seed` to migrate metadata + images.
 4. `pnpm dev`, verify galleries render. Open Admin icon, sign in via magic link, test CRUD.
 5. After confirmed: delete `public/site_images/<gallery>/` folders (keep `public/site_images/ui/` for background + menu).
+
+## Phase 7 — Community drawings (anonymous pixel-art mural) (done ✓)
+
+The "Desenhe" desktop icon now opens an interactive MS-Paint-style pixel editor
+(64×64, `image-rendering: pixelated`) plus a public "Mural" of visitor drawings.
+Visitors **without login** submit a drawing + name + message; admins moderate.
+
+### Data model + security (all in `supabase/schema.sql`, idempotent)
+
+- New table `public.drawings (id, author_name, message, png_data, hidden, created_at)`.
+  `png_data` is **RAW base64** (no `data:` prefix) of a tiny PNG, stored inline —
+  **no Storage upload**, so the `anon` role never gets write access to the public
+  `site-images` bucket.
+- **RLS** (the entire security boundary — there is no server):
+  - `anon` is column-granted INSERT on `(author_name, message, png_data)` only, plus
+    SELECT; **no UPDATE/DELETE**. Public read is `using (hidden = false)`.
+  - admins (`admins`-table membership) get `for all` → can read hidden rows, hide,
+    and delete.
+- **Table-level CHECK constraints** (not just policy WITH CHECK, so they bind every
+  writer): `author_name` 1–40 chars, `message` ≤280, `png_data` 100–6000 chars and
+  matches `^[A-Za-z0-9+/]+={0,2}$` (forbids `:` → no `data:`/SVG smuggling).
+- **Server-free throttles**: `drawings_rate_limit` trigger (≤10 inserts/min, global)
+  and `drawings_total_cap` trigger (≤2000 visible rows).
+- Render path is **load-bearing**: drawings are shown ONLY via `<img>` with a
+  **hardcoded** `data:image/png;base64,` prefix; name/message render as escaped JSX
+  text. Never fed to `window.open`/`<a href>`/`<iframe>`.
+
+### Generalized hide for gallery images
+
+- `public.images` gains `hidden boolean not null default false`; `images_public_read`
+  now filters `using (hidden = false)`. The existing `images_admin_write` `for all`
+  policy still grants admins SELECT (OR-combined), so admins see/hide/unhide any image.
+- ⚠️ Hiding removes a row from queries but does **not** revoke the public Storage URL.
+  For a true takedown of an abusive uploaded image, admin must also **Delete** it.
+
+### Moderation mode
+
+- Ships **reactive**: drawings are visible immediately; admins hide/delete bad ones.
+- To switch to an **approval queue** later: add `approved boolean not null default false`
+  and change `drawings_public_read` to `using (hidden = false and approved = true)`,
+  then re-run `schema.sql`. (Commented in the file.) Fully reversible.
+
+### Apply + rollback
+
+- Apply: `pnpm tsx scripts/run-sql.ts supabase/schema.sql` (or paste into the Dashboard
+  SQL editor). Idempotent — safe to re-run.
+- Rollback: `drop table public.drawings cascade;` (+ the two trigger functions) removes
+  the whole anon write surface; revert `images_public_read` to `using (true)` and
+  optionally `alter table public.images drop column hidden;`.
+
+### Optional hardening (not shipped — needs a test deploy)
+
+- Add a CSP `headers` block to `vercel.json`:
+  `default-src 'self'; img-src 'self' data: https://<ref>.supabase.co; frame-src https://www.youtube.com https://open.spotify.com; ...`
+  Validate against the live site (heavy inline styles + YouTube/Spotify embeds) before shipping.
+- If real spam appears, move INSERT behind a Supabase Edge Function gated by Cloudflare
+  Turnstile + per-IP rate limit, then `revoke insert ... from anon`. Schema-compatible.

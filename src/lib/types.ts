@@ -17,8 +17,21 @@ export interface ImageRow {
   sort_order: number
   width: number | null
   height: number | null
+  hidden: boolean
   created_at: string
   updated_at: string
+}
+
+// A visitor-submitted pixel-art drawing. `png_data` is RAW base64 (no
+// "data:" prefix) — the client always prepends a hardcoded
+// `data:image/png;base64,` literal at render time. See supabase/schema.sql.
+export interface DrawingRow {
+  id: string
+  author_name: string
+  message: string
+  png_data: string
+  hidden: boolean
+  created_at: string
 }
 
 // Shape consumed by gallery components (mirrors old galleries.ts shape).
