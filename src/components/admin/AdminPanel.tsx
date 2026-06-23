@@ -210,9 +210,9 @@ export function AdminPanel({ email, onSignOut }: Props) {
       )}
 
       {/* Body: two-column on wide screens */}
-      <div className="flex-1 overflow-auto p-2 grid gap-2 lg:grid-cols-[minmax(280px,360px)_1fr] lg:items-start">
+      <div className="flex-1 overflow-auto p-2 grid gap-2 grid-cols-[minmax(0,1fr)] lg:grid-cols-[minmax(280px,360px)_minmax(0,1fr)] lg:items-start">
         {/* Left column: gallery + add form (sticky on lg) */}
-        <div className="flex flex-col gap-2 lg:sticky lg:top-0">
+        <div className="flex flex-col gap-2 min-w-0 lg:sticky lg:top-0">
           <fieldset>
             <legend>Gallery</legend>
             <div className="field-row">

@@ -144,6 +144,10 @@ html, body {
   padding: 10px 9px 9px;
   margin: 0;
   background: #c0c0c0;
+  /* Fieldsets default to min-inline-size: min-content, which refuses to
+     shrink below their widest child (e.g. a long filename) and breaks the
+     grid layout. Force them to shrink so flex children can ellipsize. */
+  min-width: 0;
 }
 .admin-panel fieldset > legend {
   background: #c0c0c0;
