@@ -323,6 +323,7 @@ function AddItemForm({
   const fileRef = useRef<HTMLInputElement>(null)
   const [title, setTitle] = useState("")
   const [link, setLink] = useState("")
+  const [fileName, setFileName] = useState("")
 
   const linkValid =
     !cfg.hasLink ||
@@ -332,7 +333,7 @@ function AddItemForm({
 
   const canSubmit =
     !busy &&
-    !!fileRef.current?.files?.[0] &&
+    !!fileName &&
     title.trim().length > 0 &&
     linkValid &&
     (!cfg.linkRequired || link.trim().length > 0)
@@ -348,6 +349,7 @@ function AddItemForm({
     })
     setTitle("")
     setLink("")
+    setFileName("")
     if (fileRef.current) fileRef.current.value = ""
   }
 
@@ -357,7 +359,27 @@ function AddItemForm({
       <form onSubmit={handleSubmit} className="flex flex-col gap-2">
         <div className="field-row-stacked">
           <label>Image file (required)</label>
-          <input ref={fileRef} type="file" accept="image/*" disabled={busy} />
+          <div className="file-picker">
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              disabled={busy}
+            >
+              Browse...
+            </button>
+            <span className="file-picker-name" title={fileName}>
+              {fileName || "No file selected"}
+            </span>
+          </div>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            className="admin-file-hidden"
+            disabled={busy}
+            onChange={(e) => setFileName(e.target.files?.[0]?.name ?? "")}
+          />
+          <p className="admin-hint">Recommended: WebP, up to ~1 MB. The small grid cover is generated automatically.</p>
         </div>
         <div className="field-row-stacked">
           <label>
@@ -461,7 +483,7 @@ function ImageRowEditor({
         <p className="text-[10px] text-gray-600 break-all">
           {img.storage_path} · order {img.sort_order}
         </p>
-        <div className="field-row" style={{ flexWrap: "wrap" }}>
+        <div className="field-row">
           <button
             disabled={!dirty}
             onClick={() =>
@@ -474,14 +496,28 @@ function ImageRowEditor({
           >
             Save
           </button>
-          <button onClick={onMoveUp} disabled={isFirst}>
-            ↑
-          </button>
-          <button onClick={onMoveDown} disabled={isLast}>
-            ↓
-          </button>
           <button onClick={onDelete}>Delete</button>
         </div>
+      </div>
+      <div className="admin-reorder">
+        <button
+          className="admin-sq"
+          onClick={onMoveUp}
+          disabled={isFirst}
+          title="Move up"
+          aria-label="Move up"
+        >
+          ↑
+        </button>
+        <button
+          className="admin-sq"
+          onClick={onMoveDown}
+          disabled={isLast}
+          title="Move down"
+          aria-label="Move down"
+        >
+          ↓
+        </button>
       </div>
     </div>
   )
