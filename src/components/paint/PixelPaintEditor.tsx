@@ -11,6 +11,10 @@ const PALETTE = [
 
 const BG = "#ffffff" // canvas background; the eraser paints this.
 
+// Cap the undo stack so a long session can't grow memory without bound.
+// Each snapshot is CANVAS_SIZE² × 4 bytes (16 KB at 64px), so 50 ≈ 800 KB.
+const MAX_HISTORY = 50
+
 interface Props {
   /**
    * Called when the user finishes a drawing and clicks save. Hands the parent
@@ -27,10 +31,13 @@ export function PixelPaintEditor({ onRequestSave, resetToken = 0 }: Props) {
   const ctxRef = useRef<CanvasRenderingContext2D | null>(null)
   const drawingRef = useRef(false)
   const lastCellRef = useRef<{ x: number; y: number } | null>(null)
+  // Snapshots taken just before each stroke begins; one entry = one undo step.
+  const historyRef = useRef<ImageData[]>([])
 
   const [color, setColor] = useState(PALETTE[0])
   const [tool, setTool] = useState<"pencil" | "eraser">("pencil")
   const [hasDrawn, setHasDrawn] = useState(false)
+  const [canUndo, setCanUndo] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const fillWhite = useCallback(() => {
@@ -38,6 +45,34 @@ export function PixelPaintEditor({ onRequestSave, resetToken = 0 }: Props) {
     if (!ctx) return
     ctx.fillStyle = BG
     ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE)
+  }, [])
+
+  const clearHistory = useCallback(() => {
+    historyRef.current = []
+    setCanUndo(false)
+  }, [])
+
+  // Capture the canvas as it is *before* the next stroke, so undo can restore it.
+  const pushHistory = useCallback(() => {
+    const ctx = ctxRef.current
+    if (!ctx) return
+    historyRef.current.push(ctx.getImageData(0, 0, CANVAS_SIZE, CANVAS_SIZE))
+    if (historyRef.current.length > MAX_HISTORY) historyRef.current.shift()
+    setCanUndo(true)
+  }, [])
+
+  const undo = useCallback(() => {
+    const ctx = ctxRef.current
+    if (!ctx) return
+    const prev = historyRef.current.pop()
+    if (!prev) return
+    // Abort any in-progress stroke so the restored state isn't immediately drawn over.
+    drawingRef.current = false
+    lastCellRef.current = null
+    ctx.putImageData(prev, 0, 0)
+    setCanUndo(historyRef.current.length > 0)
+    setHasDrawn(historyRef.current.length > 0)
+    setError(null)
   }, [])
 
   // Initialize the backing buffer to a white canvas on mount.
@@ -55,9 +90,28 @@ export function PixelPaintEditor({ onRequestSave, resetToken = 0 }: Props) {
   useEffect(() => {
     if (resetToken === 0) return
     fillWhite()
+    clearHistory()
     setHasDrawn(false)
     setError(null)
-  }, [resetToken, fillWhite])
+  }, [resetToken, fillWhite, clearHistory])
+
+  // Ctrl/Cmd+Z to undo. Scoped to window but only while this editor is mounted
+  // (the parent unmounts it when the Mural tab is shown), and ignored while the
+  // user is typing in a form field so text undo still works in the save dialog.
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (!(e.ctrlKey || e.metaKey) || e.shiftKey || e.altKey) return
+      if (e.key.toLowerCase() !== "z") return
+      const target = e.target as HTMLElement | null
+      const tag = target?.tagName
+      if (tag === "INPUT" || tag === "TEXTAREA" || target?.isContentEditable)
+        return
+      e.preventDefault()
+      undo()
+    }
+    window.addEventListener("keydown", onKeyDown)
+    return () => window.removeEventListener("keydown", onKeyDown)
+  }, [undo])
 
   const paintCell = useCallback(
     (x: number, y: number) => {
@@ -115,6 +169,7 @@ export function PixelPaintEditor({ onRequestSave, resetToken = 0 }: Props) {
     const cell = cellFromEvent(e)
     if (!cell) return
     canvasRef.current?.setPointerCapture(e.pointerId)
+    pushHistory() // snapshot the pre-stroke canvas for undo
     drawingRef.current = true
     lastCellRef.current = cell
     paintCell(cell.x, cell.y)
@@ -138,6 +193,7 @@ export function PixelPaintEditor({ onRequestSave, resetToken = 0 }: Props) {
 
   const clearCanvas = () => {
     fillWhite()
+    clearHistory()
     setHasDrawn(false)
     setError(null)
   }
@@ -181,6 +237,14 @@ export function PixelPaintEditor({ onRequestSave, resetToken = 0 }: Props) {
           title="Borracha"
         >
           ⬜ Borracha
+        </button>
+        <button
+          type="button"
+          onClick={undo}
+          disabled={!canUndo}
+          title="Desfazer (Ctrl/Cmd+Z)"
+        >
+          ↶ Desfazer
         </button>
         <button type="button" onClick={clearCanvas} title="Limpar tudo">
           🗑️ Limpar
