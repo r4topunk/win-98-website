@@ -15,6 +15,8 @@ interface Props {
   onSignOut: () => void
 }
 
+type AdminTab = "galleries" | "drawings"
+
 function extFromName(name: string): string {
   const m = name.toLowerCase().match(/\.[a-z0-9]+$/)
   return m ? m[0] : ""
@@ -29,6 +31,7 @@ export function AdminPanel({ email, onSignOut }: Props) {
   const [msg, setMsg] = useState<string | null>(null)
   const [filter, setFilter] = useState("")
   const [lastSavedAt, setLastSavedAt] = useState<number | null>(null)
+  const [tab, setTab] = useState<AdminTab>("galleries")
 
   useEffect(() => {
     void loadGalleries()
@@ -210,9 +213,52 @@ export function AdminPanel({ email, onSignOut }: Props) {
         </p>
       )}
 
-      {/* Body: galleries (two-column on wide screens) + drawings moderation */}
-      <div className="flex-1 overflow-auto p-2 flex flex-col gap-3">
-      <div className="grid gap-2 grid-cols-[minmax(0,1fr)] lg:grid-cols-[minmax(280px,360px)_minmax(0,1fr)] lg:items-start">
+      {/* Tabs: galleries vs. community-drawings moderation. Each tab is its own
+          menu item instead of one long stacked scroll. */}
+      <menu role="tablist" className="admin-tabs">
+        <li
+          role="tab"
+          id="admin-tab-galleries-label"
+          aria-selected={tab === "galleries"}
+          aria-controls="admin-tab-galleries"
+        >
+          <a
+            href="#galleries"
+            onClick={(e) => {
+              e.preventDefault()
+              setTab("galleries")
+            }}
+          >
+            Galerias
+          </a>
+        </li>
+        <li
+          role="tab"
+          id="admin-tab-drawings-label"
+          aria-selected={tab === "drawings"}
+          aria-controls="admin-tab-drawings"
+        >
+          <a
+            href="#drawings"
+            onClick={(e) => {
+              e.preventDefault()
+              setTab("drawings")
+            }}
+          >
+            Desenhos da comunidade
+          </a>
+        </li>
+      </menu>
+
+      {/* Body */}
+      <div className="flex-1 overflow-auto p-2 admin-tabpanel">
+      {tab === "galleries" && (
+      <div
+        id="admin-tab-galleries"
+        role="tabpanel"
+        aria-labelledby="admin-tab-galleries-label"
+        className="grid gap-2 grid-cols-[minmax(0,1fr)] lg:grid-cols-[minmax(280px,360px)_minmax(0,1fr)] lg:items-start"
+      >
         {/* Left column: gallery + add form (sticky on lg) */}
         <div className="flex flex-col gap-2 min-w-0 lg:sticky lg:top-0">
           <fieldset>
@@ -289,8 +335,17 @@ export function AdminPanel({ email, onSignOut }: Props) {
           </fieldset>
         )}
       </div>
+      )}
 
-      <DrawingsAdmin />
+      {tab === "drawings" && (
+        <div
+          id="admin-tab-drawings"
+          role="tabpanel"
+          aria-labelledby="admin-tab-drawings-label"
+        >
+          <DrawingsAdmin />
+        </div>
+      )}
       </div>
 
       {/* Status bar */}
@@ -298,6 +353,8 @@ export function AdminPanel({ email, onSignOut }: Props) {
         <span>
           {busy
             ? "Working..."
+            : tab === "drawings"
+            ? "Moderação de desenhos da comunidade"
             : selectedGallery
             ? `${images.length} item${images.length === 1 ? "" : "s"}${
                 filter ? ` · ${filtered.length} shown` : ""
